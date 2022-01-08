@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.8)
 project ("VulkanEngine")
 
 # Add source to this project's executable.
-add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp")
+add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -78,3 +78,9 @@ elseif (UNIX)
     )
     target_link_libraries(${PROJECT_NAME} glfw ${Vulkan_LIBRARIES})
 endif()
+
+add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/ShadersCompile
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/Shaders)
