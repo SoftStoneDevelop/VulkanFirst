@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.8)
 project ("VulkanEngine")
 
 # Add source to this project's executable.
-add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp")
+add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_device.hpp" "lve_device.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp")
 
 # TODO: Add tests and install targets if needed.
 
@@ -14,7 +14,7 @@ set(PROJECT_NAME "VulkanEngine")
 set(VULKAN_SDK_PATH "${CMAKE_SOURCE_DIR}/External/vulkan")
 
 if (DEFINED VULKAN_SDK_PATH)
-  set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include/vulkan") # 1.1 Make sure this include path is correct
+  set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include") # 1.1 Make sure this include path is correct
   message(STATUS "Found Vulkan_INCLUDE_DIRS: ${Vulkan_INCLUDE_DIRS}")
   set(Vulkan_LIBRARIES "${VULKAN_SDK_PATH}/Lib") # 1.2 Make sure lib path is correct
   message(STATUS "Found Vulkan_LIBRARIES: ${Vulkan_LIBRARIES}")
