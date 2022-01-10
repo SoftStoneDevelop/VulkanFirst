@@ -10,17 +10,17 @@ namespace lve {
 
 	public:
 		static constexpr int WIDTH = 800;
-		static constexpr int HEIGTH = 600;
+		static constexpr int HEIGHT = 600;
 
 		void run();
 	private:
-		LveWindow lveWindow{ WIDTH, HEIGTH, "Vulkan Hellp!" };
+		LveWindow lveWindow{ WIDTH, HEIGHT, "Vulkan Hellp!" };
 		LveDevice lveDevice{ lveWindow };
 		LvePipeline lvePipeLine{ 
 			lveDevice,
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
-			LvePipeline::defaultPipelineConfigInfo(WIDTH, HEIGTH)
+			LvePipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)
 		};
 	};
 }

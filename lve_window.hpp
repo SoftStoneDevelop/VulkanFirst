@@ -10,7 +10,7 @@ namespace lve {
 	class LveWindow
 	{
 	public:
-		LveWindow(int width, int heigth, std::string name);
+		LveWindow(int width, int height, std::string name);
 		~LveWindow();
 
 		LveWindow(const LveWindow&) = delete;
@@ -24,7 +24,7 @@ namespace lve {
 		void initWindow();
 
 		const int width;
-		const int heigth;
+		const int height;
 
 		std::string windowName;
 		GLFWwindow* window;

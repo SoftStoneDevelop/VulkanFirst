@@ -4,7 +4,7 @@
 
 namespace lve {
 
-	LveWindow::LveWindow(int width, int heigth, std::string name) : width{ width }, heigth{ heigth }, windowName{name} {
+	LveWindow::LveWindow(int width, int height, std::string name) : width{ width }, height{ height }, windowName{name} {
 		initWindow();
 	}
 
@@ -17,7 +17,7 @@ namespace lve {
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-		window = glfwCreateWindow(width, heigth, windowName.c_str(), nullptr, nullptr);
+		window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
 	}
 
 	void LveWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
