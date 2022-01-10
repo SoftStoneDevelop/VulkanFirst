@@ -1,5 +1,6 @@
 #include "lve_pipeline.hpp"
 
+#include <cassert>
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
@@ -46,6 +47,13 @@ namespace lve {
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo
 	) {
+
+		assert(
+			configInfo.pipelineLayout != VK_NULL_HANDLE &&
+			"Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
+		assert(
+			configInfo.renderPass != VK_NULL_HANDLE &&
+			"Cannot create graphics pipeline: no renderPass provided in configInfo");
 
 		auto vertCode = readFile(vertFilepath);
 		auto fragCode = readFile(fragFilepath);
