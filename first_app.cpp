@@ -1,3 +1,5 @@
+#include "Extensions/vertex_extension.hpp"
+
 #include "first_app.hpp"
 
 #include <stdexcept>
@@ -28,21 +30,14 @@ namespace lve {
 	}
 
 	void FirstApp::loadModels() {
-		std::vector<LveModel::Vertex> verticies{
-			{{0.0f, -0.5f}},
-			{{0.5f, 0.5f}},
-			{{-0.5f, 0.5f}},
+		std::vector<lve::LveModel::Vertex>* verticies = nullptr;
+		vertex_extension::createAndFillVertex(*&verticies);
+		if (verticies == nullptr)
+		{
+			std::runtime_error("verticies not initialize!");
+		}
 
-			{{0.5f, 0.5f}},
-			{{1.0f, 1.5f}},
-			{{0.0f, 1.5f}},
-
-			{{-0.5f, 0.5f}},
-			{{0.0f, 1.5f}},
-			{{-1.0f, 1.5f}},
-		};
-
-		lveModel = std::make_unique<LveModel>(lveDevice, verticies);
+		lveModel = std::make_unique<LveModel>(lveDevice, *verticies);
 	}
 
 	void FirstApp::createPipelineLayout() {
