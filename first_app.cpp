@@ -30,14 +30,15 @@ namespace lve {
 	}
 
 	void FirstApp::loadModels() {
-		std::vector<lve::LveModel::Vertex>* verticies = nullptr;
-		vertex_extension::createAndFillVertex(*&verticies);
-		if (verticies == nullptr)
+		std::vector<lve::LveModel::Vertex> verticies;
+		lve::LveModel::Vertex startVertex = { {0.0f, -1.0f} };
+		vertex_extension::fillVertex(verticies, startVertex, 20);
+		if (verticies.empty())
 		{
-			std::runtime_error("verticies not initialize!");
+			std::runtime_error("verticies not fill!");
 		}
 
-		lveModel = std::make_unique<LveModel>(lveDevice, *verticies);
+		lveModel = std::make_unique<LveModel>(lveDevice, verticies);
 	}
 
 	void FirstApp::createPipelineLayout() {

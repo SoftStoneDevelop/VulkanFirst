@@ -2,19 +2,22 @@
 
 namespace vertex_extension {
 	
-	void createAndFillVertex(std::vector<lve::LveModel::Vertex>*& verticies) {
-		verticies = new std::vector<lve::LveModel::Vertex>{
-			{{0.0f, -0.5f}},
-			{{0.5f, 0.5f}},
-			{{-0.5f, 0.5f}},
+	void fillVertex(
+		std::vector<lve::LveModel::Vertex>& verticies,
+		lve::LveModel::Vertex& startVector,
+		uint32_t depth
+	) {
+		verticies.insert(verticies.end(), startVector);
+		lve::LveModel::Vertex vertex2 = { {startVector.position.x - 0.05f, startVector.position.y + 0.1f}};
+		verticies.insert(verticies.end(), vertex2);
+		lve::LveModel::Vertex vertex3 = { {startVector.position.x + 0.05f, startVector.position.y + 0.1f} };
+		verticies.insert(verticies.end(), vertex3);
 
-			{{0.5f, 0.5f}},
-			{{1.0f, 1.5f}},
-			{{0.0f, 1.5f}},
+		uint32_t nextLevel = depth - 1;
+		if (nextLevel <= 0)
+			return;
 
-			{{-0.5f, 0.5f}},
-			{{0.0f, 1.5f}},
-			{{-1.0f, 1.5f}},
-		};
+		fillVertex(verticies, vertex2, nextLevel);
+		fillVertex(verticies, vertex3, nextLevel);
 	}
 }

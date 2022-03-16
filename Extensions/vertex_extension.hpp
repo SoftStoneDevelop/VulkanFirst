@@ -4,5 +4,9 @@
 
 namespace vertex_extension {
 
-	void createAndFillVertex(std::vector<lve::LveModel::Vertex>*& verticies);
+	void fillVertex(
+		std::vector<lve::LveModel::Vertex>& verticies,
+		lve::LveModel::Vertex& startVector,
+		uint32_t depth
+	);
 }
