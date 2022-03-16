@@ -7,11 +7,11 @@ namespace vertex_extension {
 		lve::LveModel::Vertex& startVector,
 		uint32_t depth
 	) {
-		verticies.insert(verticies.end(), startVector);
+		verticies.push_back(startVector);
 		lve::LveModel::Vertex vertex2 = { {startVector.position.x - 0.05f, startVector.position.y + 0.1f}};
-		verticies.insert(verticies.end(), vertex2);
+		verticies.push_back(vertex2);
 		lve::LveModel::Vertex vertex3 = { {startVector.position.x + 0.05f, startVector.position.y + 0.1f} };
-		verticies.insert(verticies.end(), vertex3);
+		verticies.push_back(vertex3);
 
 		uint32_t nextLevel = depth - 1;
 		if (nextLevel <= 0)
