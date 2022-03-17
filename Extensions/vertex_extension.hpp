@@ -7,6 +7,7 @@ namespace vertex_extension {
 	void fillVertex(
 		std::vector<lve::LveModel::Vertex>& verticies,
 		lve::LveModel::Vertex& startVector,
-		uint32_t depth
+		uint32_t depth,
+		float_t stepBetweenUpVertex
 	);
 }
