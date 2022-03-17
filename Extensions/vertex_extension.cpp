@@ -7,17 +7,30 @@ namespace vertex_extension {
 		lve::LveModel::Vertex& startVector,
 		uint32_t depth
 	) {
-		verticies.push_back(startVector);
-		lve::LveModel::Vertex vertex2 = { {startVector.position.x - 0.05f, startVector.position.y + 0.1f}};
-		verticies.push_back(vertex2);
-		lve::LveModel::Vertex vertex3 = { {startVector.position.x + 0.05f, startVector.position.y + 0.1f} };
-		verticies.push_back(vertex3);
+		lve::LveModel::Vertex startLevel;
+		lve::LveModel::Vertex currentUpTriangleVertex;
+		startLevel = startVector;
+		currentUpTriangleVertex = startVector;
 
-		uint32_t nextLevel = depth - 1;
-		if (nextLevel <= 0)
-			return;
+		verticies.push_back(startLevel);
+		for (uint32_t i = 1; i<= depth; i++)
+		{
+			for (uint32_t j = 1; j <= i; j++)
+			{
+				lve::LveModel::Vertex vertex2 = { {currentUpTriangleVertex.position.x - 0.005f, currentUpTriangleVertex.position.y + 0.01f} };
+				verticies.push_back(vertex2);
+				lve::LveModel::Vertex vertex3 = { {currentUpTriangleVertex.position.x + 0.005f, currentUpTriangleVertex.position.y + 0.01f} };
+				verticies.push_back(vertex3);
 
-		fillVertex(verticies, vertex2, nextLevel);
-		fillVertex(verticies, vertex3, nextLevel);
+				currentUpTriangleVertex = { {currentUpTriangleVertex.position.x + 0.01f, currentUpTriangleVertex.position.y} };
+
+				if(j != i)
+					verticies.push_back(currentUpTriangleVertex);
+			}
+
+			startLevel = { {startLevel.position.x - 0.005f, startLevel.position.y + 0.01f} };
+			currentUpTriangleVertex = startLevel;
+			verticies.push_back(startLevel);
+		}
 	}
 }
