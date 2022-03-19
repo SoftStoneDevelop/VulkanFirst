@@ -32,7 +32,15 @@ namespace lve {
 	void FirstApp::loadModels() {
 		std::vector<lve::LveModel::Vertex> verticies;
 		lve::LveModel::Vertex startVertex = { {0.0f, -1.0f} };
-		vertex_extension::fillVertex(verticies, startVertex, 200, 0.01f);
+		vertex_extension::fillVertex(
+			verticies,
+			startVertex,
+			1,
+			0.5f,
+			{ 1.0f, 0.0f, 0.0f },
+			{ 0.0f, 0.0f, 1.0f },
+			{ 0.0f, 1.0f, 0.0f }
+			);
 		if (verticies.empty())
 		{
 			std::runtime_error("verticies not fill!");
