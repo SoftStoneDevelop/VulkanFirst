@@ -47,7 +47,7 @@ namespace vertex_extension {
 					verticies.push_back(currentUpTriangleVertex);
 			}
 
-			startLevel = { {startLevel.position.x - stepDownVertex, startLevel.position.y + stepBetweenUpVertex} };
+			startLevel = { {startLevel.position.x - stepDownVertex, startLevel.position.y + stepBetweenUpVertex}, colorVertex1 };
 			currentUpTriangleVertex = startLevel;
 			verticies.push_back(startLevel);
 		}
