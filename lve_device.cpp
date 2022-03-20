@@ -76,9 +76,9 @@ void LveDevice::createInstance() {
   VkApplicationInfo appInfo = {};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
   appInfo.pApplicationName = "LittleVulkanEngine App";
-  appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-  appInfo.pEngineName = "No Engine";
-  appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+  appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 8);
+  appInfo.pEngineName = "First Engine";
+  appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 8);
   appInfo.apiVersion = VK_API_VERSION_1_0;
 
   VkInstanceCreateInfo createInfo = {};
@@ -283,7 +283,7 @@ void LveDevice::hasGflwRequiredInstanceExtensions() {
   std::cout << "available extensions:" << std::endl;
   std::unordered_set<std::string> available;
   for (const auto &extension : extensions) {
-    std::cout << "\t" << extension.extensionName << std::endl;
+      std::cout << "\t" << extension.extensionName << "; version is " << extension.specVersion << std::endl;
     available.insert(extension.extensionName);
   }
 
