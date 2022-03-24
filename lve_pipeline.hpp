@@ -54,12 +54,10 @@ namespace lve {
 			const PipelineConfigInfo& configInfo
 		);
 
-		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+		VkShaderModule createShaderModule(const std::vector<char>& code);
 
 		LveDevice& lveDevice;
 		VkPipeline graphicsPipeline;
-		VkShaderModule vertShaderModule;
-		VkShaderModule fragShaderModule;
 
 	};
 }

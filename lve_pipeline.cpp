@@ -18,9 +18,6 @@ namespace lve {
 	}
 
 	LvePipeline::~LvePipeline() {
-		vkDestroyShaderModule(lveDevice.device(), vertShaderModule, nullptr);
-		vkDestroyShaderModule(lveDevice.device(), fragShaderModule, nullptr);
-
 		vkDestroyPipeline(lveDevice.device(), graphicsPipeline, nullptr);
 	}
 	
@@ -59,8 +56,8 @@ namespace lve {
 		auto vertCode = readFile(vertFilepath);
 		auto fragCode = readFile(fragFilepath);
 
-		createShaderModule(vertCode, &vertShaderModule);
-		createShaderModule(fragCode, &fragShaderModule);
+		VkShaderModule vertShaderModule = createShaderModule(vertCode);
+		VkShaderModule fragShaderModule = createShaderModule(fragCode);
 
 		VkPipelineShaderStageCreateInfo shaderStages[2];
 		shaderStages[0].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -120,19 +117,25 @@ namespace lve {
 		{
 			throw std::runtime_error("failed to create graphics pipelien");
 		}
+
+		vkDestroyShaderModule(lveDevice.device(), vertShaderModule, nullptr);
+		vkDestroyShaderModule(lveDevice.device(), fragShaderModule, nullptr);
 	}
 
-	void LvePipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+	VkShaderModule LvePipeline::createShaderModule(const std::vector<char>& code) {
 
+		VkShaderModule shaderModule{};
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-		if (vkCreateShaderModule(lveDevice.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS)
+		if (vkCreateShaderModule(lveDevice.device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create shader module!");
 		}
+
+		return shaderModule;
 	}
 
 	void LvePipeline::bind(VkCommandBuffer commandBuffer) {
