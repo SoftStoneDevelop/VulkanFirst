@@ -20,9 +20,9 @@ namespace lve {
 		LveRenderer(const LveRenderer&) = delete;
 		void operator=(const LveRenderer&) = delete;
 
-		bool isFraneInProgress() const { return isFrameStarted; };
-
 		VkRenderPass getSwapChainRenderPass() const { return lveSwapChain->getRenderPass(); }
+		float getAspectRation() const { return lveSwapChain->extentAspectRatio(); };
+		bool isFrameInProgress() const { return isFrameStarted; };
 
 		VkCommandBuffer getCurrentCommandBuffer() const {
 			assert(isFrameStarted && "Cannot get command buffer when frame not in progress");

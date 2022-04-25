@@ -61,17 +61,21 @@ namespace lve {
 			);
 	}
 
-	void SimpleRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<LveGameObject>& gameObjects) {
+	void SimpleRenderSystem::renderGameObjects(
+		VkCommandBuffer commandBuffer,
+		std::vector<LveGameObject>& gameObjects,
+		const LveCamera& camera
+	) {
 		lvePipeline->bind(commandBuffer);
 
 		for (auto& obj : gameObjects)
 		{
 			obj.transform.rotation.y = glm::mod<float>(obj.transform.rotation.y + 0.0001f, glm::two_pi<float>());
 			obj.transform.rotation.x = glm::mod<float>(obj.transform.rotation.x + 0.0005f, glm::two_pi<float>());
-
+			
 			SimplePushConstantData push{};
 			push.color = obj.color;
-			push.transform = obj.transform.mat4();
+			push.transform = camera.getProjection() * obj.transform.mat4();
 
 			vkCmdPushConstants(
 				commandBuffer,
