@@ -1,5 +1,6 @@
 #include "first_app.hpp"
 
+#include "keyboard_movement_controller.hpp"
 #include "lve_camera.hpp"
 #include "simple_render_system.hpp"
 
@@ -11,6 +12,7 @@
 
 #include <stdexcept>
 #include <array>
+#include <chrono>
 
 namespace lve {
 
@@ -24,8 +26,20 @@ namespace lve {
 		SimpleRenderSystem simpleRenderSystem{lveDevice, lveRenderer.getSwapChainRenderPass()};
         LveCamera camera{};
 
+        auto viewerObject = LveGameObject::createGameObject();
+        KeyboardMovementController cameraController{};
+
+        auto currentTime = std::chrono::high_resolution_clock::now();
+
 		while (!lveWindow.shouldClose()) {
 			glfwPollEvents();
+
+            auto newTime = std::chrono::high_resolution_clock::now();
+            float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+            currentTime = newTime;
+
+            cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
+            camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
             
             float aspect = lveRenderer.getAspectRation();
             //camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
