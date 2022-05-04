@@ -2,16 +2,23 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.8)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project ("VulkanEngine")
 
 # Add source to this project's executable.
-add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_device.hpp" "lve_device.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp" "lve_swap_chain.hpp" "lve_swap_chain.cpp" "lve_model.hpp" "lve_model.cpp"    "lve_game_object.hpp" "lve_renderer.hpp" "lve_renderer.cpp" "simple_render_system.hpp" "simple_renderer_system.cpp" "lve_camera.hpp" "lve_camera.cpp" "keyboard_movement_controller.hpp" "keyboard_movement_controller.cpp")
+add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_device.hpp" "lve_device.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp" "lve_swap_chain.hpp" "lve_swap_chain.cpp" "lve_model.hpp" "lve_model.cpp"    "lve_game_object.hpp" "lve_renderer.hpp" "lve_renderer.cpp" "simple_render_system.hpp" "simple_renderer_system.cpp" "lve_camera.hpp" "lve_camera.cpp" "keyboard_movement_controller.hpp" "keyboard_movement_controller.cpp" "lve_utils.hpp")
 
 # TODO: Add tests and install targets if needed.
 
 set(PROJECT_NAME "VulkanEngine")
 set(VULKAN_SDK_PATH "${CMAKE_SOURCE_DIR}/External/vulkan")
+
+set(TINYOBJLOADER_PATH "${CMAKE_SOURCE_DIR}/External/tinyobjloader")
+target_include_directories(${PROJECT_NAME} PUBLIC
+    ${TINYOBJLOADER_PATH}
+    )
 
 if (DEFINED VULKAN_SDK_PATH)
   set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include") # 1.1 Make sure this include path is correct
