@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project ("VulkanEngine")
 
 # Add source to this project's executable.
-add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_device.hpp" "lve_device.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp" "lve_swap_chain.hpp" "lve_swap_chain.cpp" "lve_model.hpp" "lve_model.cpp"    "lve_game_object.hpp" "lve_renderer.hpp" "lve_renderer.cpp" "simple_render_system.hpp" "simple_renderer_system.cpp" "lve_camera.hpp" "lve_camera.cpp" "keyboard_movement_controller.hpp" "keyboard_movement_controller.cpp" "lve_utils.hpp")
+add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_device.hpp" "lve_device.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp" "lve_swap_chain.hpp" "lve_swap_chain.cpp" "lve_model.hpp" "lve_model.cpp"    "lve_game_object.hpp" "lve_renderer.hpp" "lve_renderer.cpp" "simple_render_system.hpp" "simple_renderer_system.cpp" "lve_camera.hpp" "lve_camera.cpp" "keyboard_movement_controller.hpp" "keyboard_movement_controller.cpp" "lve_utils.hpp" "lve_game_object.cpp")
 
 # TODO: Add tests and install targets if needed.
 
