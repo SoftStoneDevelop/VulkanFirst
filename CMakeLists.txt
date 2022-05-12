@@ -4,6 +4,7 @@
 cmake_minimum_required (VERSION 3.8)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 project ("VulkanEngine")
 
@@ -111,14 +112,6 @@ file(GLOB_RECURSE GLSL_SOURCE_FILES
   "${SHADER_SOURCE_DIR}/*.frag"
   "${SHADER_SOURCE_DIR}/*.vert"
 )
-
-file(GLOB_RECURSE Models 
-"${CMAKE_CURRENT_SOURCE_DIR}/Models/*.obj"
-)
-foreach(modelFile ${Models})
-  message(STATUS "Find source model FILE_NAME: ${modelFile} ")
-endforeach(modelFile)
-
 
 foreach(GLSL ${GLSL_SOURCE_FILES})
   get_filename_component(FILE_NAME ${GLSL} NAME)
