@@ -1,25 +1,37 @@
 ﻿# CMakeList.txt : CMake project for VulkanEngine, include source and define
 # project specific logic here.
 #
+include(./.env.cmake OPTIONAL RESULT_VARIABLE LOCAL_ENV)
+message(STATUS "Local .env.cmake: ${LOCAL_ENV}")
+
 cmake_minimum_required (VERSION 3.8)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-project ("VulkanEngine")
+set(NAME LveEngine)
+project(${NAME} VERSION 0.23.0)
+
+message(STATUS "using ${CMAKE_GENERATOR}")
+if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
+    if (NOT MINGW_PATH) 
+      message(FATAL_ERROR "MINGW_PATH not set in .env.cmake")
+    endif()
+    set(USE_MINGW "True")
+    set(CMAKE_C_COMPILER ${MINGW_PATH}/bin/gcc.exe)
+    set(CMAKE_CXX_COMPILER  ${MINGW_PATH}/bin/g++.exe)
+endif()
 
 # Add source to this project's executable.
-add_executable (VulkanEngine   "lve_window.hpp" "lve_window.cpp" "first_app.hpp" "main.cpp" "first_app.cpp" "lve_device.hpp" "lve_device.cpp" "lve_pipeline.hpp" "lve_pipeline.cpp" "lve_swap_chain.hpp" "lve_swap_chain.cpp" "lve_model.hpp" "lve_model.cpp"    "lve_game_object.hpp" "lve_renderer.hpp" "lve_renderer.cpp" "simple_render_system.hpp" "simple_renderer_system.cpp" "lve_camera.hpp" "lve_camera.cpp" "keyboard_movement_controller.hpp" "keyboard_movement_controller.cpp" "lve_utils.hpp" "lve_game_object.cpp" "lve_buffer.hpp" "lve_buffer.cpp" "lve_frame_info.hpp" "lve_descriptors.hpp" "lve_descriptors.cpp")
+file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/Src/*.cpp)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
 # TODO: Add tests and install targets if needed.
 
-set(PROJECT_NAME "VulkanEngine")
-set(VULKAN_SDK_PATH "${CMAKE_SOURCE_DIR}/External/vulkan")
-
-set(TINYOBJLOADER_PATH "${CMAKE_SOURCE_DIR}/External/tinyobjloader")
-target_include_directories(${PROJECT_NAME} PUBLIC
-    ${TINYOBJLOADER_PATH}
-    )
+# If TINYOBJ_PATH not specified in .env.cmake, try fetching from git repo
+if (NOT TINYOBJ_PATH)
+  message(STATUS "TINYOBJ_PATH not specified in .env.cmake, using external/tinyobjloader")
+  set(TINYOBJ_PATH External/tinyobjloader)
+endif()
 
 if (DEFINED VULKAN_SDK_PATH)
   set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include") # 1.1 Make sure this include path is correct
@@ -36,8 +48,6 @@ if (NOT Vulkan_FOUND)
 else()
 	message(STATUS "Using vulkan lib at: ${Vulkan_LIBRARIES}")
 endif()
-
-set(GLFW_PATH "${CMAKE_SOURCE_DIR}/External/glfw")
 
 if (DEFINED GLFW_PATH)
   message(STATUS "Using GLFW path specified in .env")
@@ -59,16 +69,26 @@ else()
 	message(STATUS "Using glfw lib at: ${GLFW_LIB}")
 endif()
 
-
-set(GLM_PATH "${CMAKE_SOURCE_DIR}/External/glm-0.9.9.8/glm")
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
 
 if (WIN32)
   message(STATUS "CREATING BUILD FOR WINDOWS")
 
+  if (USE_MINGW)
+    target_include_directories(${PROJECT_NAME} PUBLIC
+      ${MINGW_PATH}/include
+    )
+    target_link_directories(${PROJECT_NAME} PUBLIC
+      ${MINGW_PATH}/lib
+    )
+  endif()
+
   target_include_directories(${PROJECT_NAME} PUBLIC
+    ${PROJECT_SOURCE_DIR}/src
     ${Vulkan_INCLUDE_DIRS}
     ${GLFW_INCLUDE_DIRS}
     ${GLM_PATH}
+    ${TINYOBJ_PATH}
     )
 
   target_link_directories(${PROJECT_NAME} PUBLIC
@@ -126,6 +146,6 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
 endforeach(GLSL)
 
 add_custom_target(
-    run ALL
+    Shaders ALL
     DEPENDS ${SPIRV_BINARY_FILES}
 )

@@ -22,7 +22,6 @@ namespace lve {
 	}
 	
 	std::vector<char> LvePipeline::readFile(const std::string& filepath) {
-		
 		std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
 
 		if (!file.is_open()) {

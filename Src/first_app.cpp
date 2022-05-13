@@ -122,21 +122,21 @@ namespace lve {
 	} 
 
 	void FirstApp::loadGameObjects() {
-		std::shared_ptr<LveModel> lveModel = LveModel::createModelFromFile(lveDevice, "E:/Work/VulkanFirst3d/Models/flat_vase.obj");
+		std::shared_ptr<LveModel> lveModel = LveModel::createModelFromFile(lveDevice, "Models/flat_vase.obj");
         auto flatVase = LveGameObject::createGameObject();
 		flatVase.model = lveModel;
 		flatVase.transform.translation = { -.5f, .5f, 0.f };
 		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
         gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
-		lveModel = LveModel::createModelFromFile(lveDevice, "E:/Work/VulkanFirst3d/Models/smooth_vase.obj");
+		lveModel = LveModel::createModelFromFile(lveDevice, "Models/smooth_vase.obj");
 		auto smoothVase = LveGameObject::createGameObject();
 		smoothVase.model = lveModel;
 		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
 		gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
 
-		lveModel = LveModel::createModelFromFile(lveDevice, "E:/Work/VulkanFirst3d/Models/quad.obj");
+		lveModel = LveModel::createModelFromFile(lveDevice, "Models/quad.obj");
 		auto floor = LveGameObject::createGameObject();
 		floor.model = lveModel;
 		floor.transform.translation = { 0.f, .5f, 0.f };
