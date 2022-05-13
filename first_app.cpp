@@ -52,7 +52,7 @@ namespace lve {
 		}
 
 		auto globalSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build()
 			;
 
@@ -100,7 +100,8 @@ namespace lve {
 					frameTime,
 					commandBuffer,
 					camera,
-					globalDescriptorSets[frameIndex]
+					globalDescriptorSets[frameIndex],
+					gameObjects
 				};
 
 				//update
@@ -111,7 +112,7 @@ namespace lve {
 
 				//render
 				lveRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
+				simpleRenderSystem.renderGameObjects(frameInfo);
 				lveRenderer.endSwapChainRenderPass(commandBuffer);
 				lveRenderer.endFrame();
 			}
@@ -126,20 +127,20 @@ namespace lve {
 		flatVase.model = lveModel;
 		flatVase.transform.translation = { -.5f, .5f, 0.f };
 		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-        gameObjects.push_back(std::move(flatVase));
+        gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
 		lveModel = LveModel::createModelFromFile(lveDevice, "E:/Work/VulkanFirst3d/Models/smooth_vase.obj");
 		auto smoothVase = LveGameObject::createGameObject();
 		smoothVase.model = lveModel;
 		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
-		gameObjects.push_back(std::move(smoothVase));
+		gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
 
 		lveModel = LveModel::createModelFromFile(lveDevice, "E:/Work/VulkanFirst3d/Models/quad.obj");
 		auto floor = LveGameObject::createGameObject();
 		floor.model = lveModel;
 		floor.transform.translation = { 0.f, .5f, 0.f };
 		floor.transform.scale = { 3.f, 1.f, 3.f };
-		gameObjects.push_back(std::move(floor));
+		gameObjects.emplace(floor.getId(), std::move(floor));
 	}
 }
