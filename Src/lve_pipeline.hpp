@@ -13,6 +13,8 @@ namespace lve {
 		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
 		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
 
+		std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
+		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 		VkViewport viewport;
 		VkRect2D scissor;
 		VkPipelineViewportStateCreateInfo viewportInfo;
