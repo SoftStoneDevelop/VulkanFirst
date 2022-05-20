@@ -107,6 +107,7 @@ namespace lve {
 				GlobalUbo ubo{};
 				ubo.projection = camera.getProjection();
 				ubo.view = camera.getView();
+				ubo.inverseView = camera.getInverseView();
 				pointLightSystem.update(frameInfo, ubo);
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
@@ -145,7 +146,7 @@ namespace lve {
 		floor.transform.scale = { 3.f, 1.f, 3.f };
 		gameObjects.emplace(floor.getId(), std::move(floor));
 
-		auto pointLight = LveGameObject::makePointLight(0.2f);
+		auto pointLight = LveGameObject::makePointLight(0.02f);
 		gameObjects.emplace(pointLight.getId(), std::move(pointLight));
 
 		std::vector<glm::vec3> lightColors{
