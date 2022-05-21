@@ -7,6 +7,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include <stdexcept>
+#include <map>
 #include <array>
 
 namespace lve {
@@ -55,6 +56,7 @@ namespace lve {
 
 		PipelineConfigInfo pipelineConfig{};
 		LvePipeline::defaultPipelineConfigInfo(pipelineConfig);
+		LvePipeline::enableAlphaBlending(pipelineConfig);
 
 		pipelineConfig.attributeDescriptions.clear();
 		pipelineConfig.bindingDescriptions.clear();
@@ -94,6 +96,19 @@ namespace lve {
 	}
 
 	void PointLightSystem::render(FrameInfo& frameInfo) {
+		//sort lights
+		std::map<float, LveGameObject::id_t> sorted;
+		for (auto& kv : frameInfo.gameObjects)
+		{
+			auto& obj = kv.second;
+			if (obj.pointLight == nullptr) continue;
+
+			//calculate distance
+			auto offset = frameInfo.camera.getPosition() - obj.transform.translation;
+			float disSquared = glm::dot(offset, offset);
+			sorted[disSquared] = obj.getId();
+		}
+
 		lvePipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(
@@ -107,10 +122,11 @@ namespace lve {
 			nullptr
 		);
 
-		for (auto& kv : frameInfo.gameObjects)
+		//iterat through sorted light in reverse order
+		for (auto it = sorted.rbegin(); it != sorted.rend(); it++)
 		{
-			auto& obj = kv.second;
-			if (obj.pointLight == nullptr) continue;
+			//use game obj id to find light object
+			auto& obj = frameInfo.gameObjects.at(it->second);
 
 			PointLightPushConstant push{};
 			push.position = glm::vec4(obj.transform.translation, 1.f);
