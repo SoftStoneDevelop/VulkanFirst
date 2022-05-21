@@ -107,7 +107,7 @@ elseif (UNIX)
     target_link_libraries(${PROJECT_NAME} glfw ${Vulkan_LIBRARIES})
 endif()
 
-set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ShadersSource)
+set(SHADER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ShaderSources)
 set(SHADER_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Shaders)
 
 ############## Build SHADERS #######################
