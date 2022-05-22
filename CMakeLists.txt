@@ -33,6 +33,12 @@ if (NOT TINYOBJ_PATH)
   set(TINYOBJ_PATH External/tinyobjloader)
 endif()
 
+# If STB_IMAGE_PATH not specified in .env.cmake, try fetching from git repo
+if (NOT STB_IMAGE_PATH)
+  message(STATUS "STB_IMAGE_PATH not specified in .env.cmake, using external/STB")
+  set(STB_IMAGE_PATH External/STB)
+endif()
+
 if (DEFINED VULKAN_SDK_PATH)
   set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include") # 1.1 Make sure this include path is correct
   message(STATUS "Found Vulkan_INCLUDE_DIRS: ${Vulkan_INCLUDE_DIRS}")
@@ -89,6 +95,7 @@ if (WIN32)
     ${GLFW_INCLUDE_DIRS}
     ${GLM_PATH}
     ${TINYOBJ_PATH}
+    ${STB_IMAGE_PATH}
     )
 
   target_link_directories(${PROJECT_NAME} PUBLIC
@@ -103,6 +110,7 @@ elseif (UNIX)
     target_include_directories(${PROJECT_NAME} PUBLIC
       ${PROJECT_SOURCE_DIR}/src
       ${TINYOBJ_PATH}
+      ${STB_IMAGE_PATH}
     )
     target_link_libraries(${PROJECT_NAME} glfw ${Vulkan_LIBRARIES})
 endif()
