@@ -35,8 +35,8 @@ endif()
 
 # If STB_IMAGE_PATH not specified in .env.cmake, try fetching from git repo
 if (NOT STB_IMAGE_PATH)
-  message(STATUS "STB_IMAGE_PATH not specified in .env.cmake, using external/STB")
-  set(STB_IMAGE_PATH External/STB)
+  message(STATUS "STB_IMAGE_PATH not specified in .env.cmake, using external/stb")
+  set(STB_IMAGE_PATH External/stb)
 endif()
 
 if (DEFINED VULKAN_SDK_PATH)
