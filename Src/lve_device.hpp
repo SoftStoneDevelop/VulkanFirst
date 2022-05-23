@@ -70,6 +70,8 @@ class LveDevice {
       VkImage &image,
       VkDeviceMemory &imageMemory);
 
+  void createImageView(VkImageView& imageView, VkImage& image, VkFormat& format);
+
   VkPhysicalDeviceProperties properties;
 
  private:
