@@ -1,3 +1,5 @@
+#pragma once
+
 #include "first_app.hpp"
 
 #include "keyboard_movement_controller.hpp"
