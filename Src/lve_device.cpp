@@ -531,7 +531,7 @@ void LveDevice::createImageWithInfo(
   }
 }
 
-void LveDevice::createImageView(VkImageView& imageView, VkImage& image, VkFormat& format)
+void LveDevice::createImageView(VkImageView& imageView, VkImage& image, VkFormat format)
 {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -549,7 +549,7 @@ void LveDevice::createImageView(VkImageView& imageView, VkImage& image, VkFormat
     }
 }
 
-void LveDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+void LveDevice::transitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout) {
     VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
     VkImageMemoryBarrier barrier{};
