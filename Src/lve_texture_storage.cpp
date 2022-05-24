@@ -7,6 +7,7 @@
 #include "lve_texture_storage.hpp"
 #include <stdexcept>
 #include "lve_buffer.hpp"
+#include "Definitions/DefaultSamplersNames.hpp"
 
 namespace lve {
 
@@ -18,11 +19,76 @@ namespace lve {
 
     LveTextureStorage::~LveTextureStorage()
     {
+        for (auto& kv : textureSamplers)
+        {
+            auto& textureSampler = kv.second;
+            vkDestroySampler(lveDevice.device(), textureSampler, nullptr);
+        }
+
         for (auto& kv : textureDatas)
         {
             auto& textureData = kv.second;
             destroyAndFreeTextureData(textureData);
         }
+    }
+
+    VkSampler LveTextureStorage::getSampler(const std::string& samplerName)
+    {
+        if (textureSamplers.count(samplerName) == 0)
+        {
+            if (samplerName == defaultSamplerName)
+            {
+                VkSamplerCreateInfo defaultSampler{};
+                defaultSampler.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+                defaultSampler.magFilter = VK_FILTER_LINEAR;
+                defaultSampler.minFilter = VK_FILTER_LINEAR;
+                defaultSampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                defaultSampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                defaultSampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+                defaultSampler.anisotropyEnable = VK_TRUE;
+                defaultSampler.maxAnisotropy = lveDevice.properties.limits.maxSamplerAnisotropy;
+                defaultSampler.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+                defaultSampler.unnormalizedCoordinates = VK_FALSE;
+                defaultSampler.compareEnable = VK_FALSE;
+                defaultSampler.compareOp = VK_COMPARE_OP_ALWAYS;
+                defaultSampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+                VkSampler textureSampler{};
+                createTextureSampler(defaultSampler, textureSampler, samplerName);
+
+                return textureSampler;
+            }
+        }
+        else
+        {
+            return textureSamplers[samplerName];
+        }
+
+        throw std::runtime_error("Not find sampler with name:" + samplerName);
+    }
+
+    void LveTextureStorage::createTextureSampler(
+        VkSamplerCreateInfo& samplerInfo,
+        VkSampler textureSampler,
+        const std::string& samplerName
+    )
+    {
+        if (vkCreateSampler(lveDevice.device(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create texture sampler!");
+        }
+
+        assert(textureSamplers.count(samplerName) == 0 && "Sampler already in use");
+        textureSamplers[samplerName] = textureSampler;
+    }
+
+    void LveTextureStorage::destroySampler(const std::string& samplerName)
+    {
+        if (textureSamplers.count(samplerName) == 0)
+            return;
+
+        auto& textureSampler = textureSamplers.at(samplerName);
+        vkDestroySampler(lveDevice.device(), textureSampler, nullptr);
+        textureDatas.erase(samplerName);
     }
 
     void LveTextureStorage::createTextureImage(LveTextureStorage::TextureData& imageData, const std::string& texturePath) {
@@ -88,15 +154,22 @@ namespace lve {
         );
     }
 
-    void LveTextureStorage::loadTexture(const std::string& textureName) {
+    void LveTextureStorage::loadTexture(const std::string& texturePath, const std::string& textureName) {
         LveTextureStorage::TextureData imageData{};
-        createTextureImage(imageData, textureName);
+        createTextureImage(imageData, texturePath);
         lveDevice.createImageView(imageData.imageView, imageData.image, VK_FORMAT_R8G8B8A8_SRGB);
+
+        assert(textureDatas.count(textureName) == 0 && "Texture already in use");
+        textureDatas[textureName] = std::move(imageData);
     }
 
     void LveTextureStorage::unloadTexture(const std::string& textureName) {
-        auto& obj = textureDatas.at(textureName);
-        destroyAndFreeTextureData(obj);
+
+        if (textureDatas.count(textureName) == 0)
+            return;
+
+        auto& textureData = textureDatas.at(textureName);
+        destroyAndFreeTextureData(textureData);
         textureDatas.erase(textureName);
     }
 
