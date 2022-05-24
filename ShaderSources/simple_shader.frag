@@ -58,5 +58,5 @@ void main(){
 	}
 
 	vec4 textColor = texture(texSampler, fragTexCoord);
-	outColor = vec4(diffuseLight * textColor.xyz + specularLight * textColor.xyz, 1.0);
+	outColor = vec4(diffuseLight * textColor.xyz + specularLight * textColor.xyz, 1.0);;
 }
