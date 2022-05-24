@@ -69,7 +69,6 @@ namespace lve {
         );
         lveDevice.transitionImageLayout(
             imageData.image,
-            VK_FORMAT_R8G8B8A8_SRGB,
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
         );
@@ -84,7 +83,6 @@ namespace lve {
 
         lveDevice.transitionImageLayout(
             imageData.image,
-            VK_FORMAT_R8G8B8A8_SRGB,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
@@ -93,7 +91,7 @@ namespace lve {
     void LveTextureStorage::loadTexture(const std::string& textureName) {
         LveTextureStorage::TextureData imageData{};
         createTextureImage(imageData, textureName);
-        //TODO create imageView
+        lveDevice.createImageView(imageData.imageView, imageData.image, VK_FORMAT_R8G8B8A8_SRGB);
     }
 
     void LveTextureStorage::unloadTexture(const std::string& textureName) {
