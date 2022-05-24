@@ -23,10 +23,13 @@ namespace lve {
 
 		void loadTexture(const std::string& texturePath, const std::string& textureName);
 		void unloadTexture(const std::string& textureName);
+		TextureData& getTextureData(const std::string& textureName);
 
-		void createTextureSampler(VkSamplerCreateInfo& samplerInfo, VkSampler textureSampler, const std::string& samplerName);
+		VkSampler createTextureSampler(VkSamplerCreateInfo& samplerInfo, const std::string& samplerName);
 		void destroySampler(const std::string& samplerName);
 		VkSampler getSampler(const std::string& samplerName);
+
+		VkDescriptorImageInfo descriptorInfo(const std::string& samplerName, const std::string& textureName);
 
 	private:
 		void createTextureImage(LveTextureStorage::TextureData& imageData, const std::string& texturePath);

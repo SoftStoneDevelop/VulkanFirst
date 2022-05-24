@@ -9,6 +9,10 @@
 #include "lve_buffer.hpp"
 #include "Definitions/DefaultSamplersNames.hpp"
 
+#ifndef ENGINE_DIR
+#define ENGINE_DIR "../../../" 
+#endif // !ENGINE_DIR
+
 namespace lve {
 
     LveTextureStorage::LveTextureStorage(
@@ -32,6 +36,19 @@ namespace lve {
         }
     }
 
+    VkDescriptorImageInfo LveTextureStorage::descriptorInfo(const std::string& samplerName, const std::string& textureName)
+    {
+        auto& data = getTextureData(textureName);
+        auto sampler = getSampler(samplerName);
+
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = data.imageView;
+        imageInfo.sampler = sampler;
+
+        return imageInfo;
+    }
+
     VkSampler LveTextureStorage::getSampler(const std::string& samplerName)
     {
         if (textureSamplers.count(samplerName) == 0)
@@ -53,8 +70,7 @@ namespace lve {
                 defaultSampler.compareOp = VK_COMPARE_OP_ALWAYS;
                 defaultSampler.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-                VkSampler textureSampler{};
-                createTextureSampler(defaultSampler, textureSampler, samplerName);
+                auto textureSampler = createTextureSampler(defaultSampler, samplerName);
 
                 return textureSampler;
             }
@@ -67,18 +83,32 @@ namespace lve {
         throw std::runtime_error("Not find sampler with name:" + samplerName);
     }
 
-    void LveTextureStorage::createTextureSampler(
+    LveTextureStorage::TextureData& LveTextureStorage::getTextureData(const std::string& textureName)
+    {
+        if (textureDatas.count(textureName) == 0)
+        {
+            throw std::runtime_error("Not find texture with name:" + textureName);
+        }
+        else
+        {
+            return textureDatas[textureName];
+        }
+    }
+
+    VkSampler LveTextureStorage::createTextureSampler(
         VkSamplerCreateInfo& samplerInfo,
-        VkSampler textureSampler,
         const std::string& samplerName
     )
     {
+        VkSampler textureSampler{};
         if (vkCreateSampler(lveDevice.device(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture sampler!");
         }
 
         assert(textureSamplers.count(samplerName) == 0 && "Sampler already in use");
         textureSamplers[samplerName] = textureSampler;
+
+        return textureSampler;
     }
 
     void LveTextureStorage::destroySampler(const std::string& samplerName)
@@ -156,7 +186,7 @@ namespace lve {
 
     void LveTextureStorage::loadTexture(const std::string& texturePath, const std::string& textureName) {
         LveTextureStorage::TextureData imageData{};
-        createTextureImage(imageData, texturePath);
+        createTextureImage(imageData, ENGINE_DIR + texturePath);
         lveDevice.createImageView(imageData.imageView, imageData.image, VK_FORMAT_R8G8B8A8_SRGB);
 
         assert(textureDatas.count(textureName) == 0 && "Texture already in use");
