@@ -155,7 +155,7 @@ namespace lve {
 		flatVase.model = lveModel;
 		flatVase.transform.translation = { -.5f, .5f, 0.f };
 		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-		flatVase.model->setTextureName("statue");
+		flatVase.model->setTextureName("statue2");
         gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
 		lveModel = LveModel::createModelFromFile(lveDevice, "Models/smooth_vase.obj");
@@ -163,7 +163,7 @@ namespace lve {
 		smoothVase.model = lveModel;
 		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
-		smoothVase.model->setTextureName("statue");
+		smoothVase.model->setTextureName("statue3");
 		gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
 
 		lveModel = LveModel::createModelFromFile(lveDevice, "Models/quad.obj");
@@ -204,5 +204,7 @@ namespace lve {
 	void FirstApp::loadTextures()
 	{
 		lveTextureStorage.loadTexture("Textures/statue.jpg", "statue");
+		lveTextureStorage.loadTexture("Textures/statue2.jpg", "statue2");
+		lveTextureStorage.loadTexture("Textures/statue3.jpg", "statue3");
 	}
 }

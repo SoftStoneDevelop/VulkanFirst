@@ -152,7 +152,6 @@ namespace lve {
 	void LveModel::setTextureName(std::string&& textureName)
 	{
 		(*this).textureName = std::move(textureName);
-		textureChange = true;
 	}
 
 	std::string& LveModel::getTextureName()

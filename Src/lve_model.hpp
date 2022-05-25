@@ -62,8 +62,6 @@ namespace lve {
 		void setTextureName(std::string&& textureName);
 		std::string& getTextureName();
 
-		bool textureChange = true;
-
 	private:
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);

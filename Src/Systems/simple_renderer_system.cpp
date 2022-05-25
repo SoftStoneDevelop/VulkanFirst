@@ -79,39 +79,14 @@ namespace lve {
 		lvePipeline->bind(frameInfo.commandBuffer);
 
 		std::vector<VkDescriptorSet> bindDescriptorSets{ frameInfo.globalDescriptorSet, descriptorSets[frameInfo.frameIndex] };
-		vkCmdBindDescriptorSets(
-			frameInfo.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout,
-			0,
-			static_cast<uint32_t>(bindDescriptorSets.size()),
-			bindDescriptorSets.data(),
-			0,
-			nullptr
-		);
-
 		for (auto& kv : frameInfo.gameObjects) 
 		{
 			auto& obj = kv.second;
 			if (obj.model == nullptr) continue;
 
-			if (obj.model->textureChange)
-			{
-				for (int i = 0; i < descriptorSets.size(); i++)
-				{
-					auto imageInfo = lveTextureStorage.descriptorInfo(defaultSamplerName, obj.model->getTextureName());
-					LveDescriptorWriter(textureSetLayout, texturePool)
-						.writeImage(0, &imageInfo)
-						.overwrite(descriptorSets[i]);
-				}
-
-				obj.model->textureChange = false;
-			}
-			
 			SimplePushConstantData push{};
 			push.modelMatrix = obj.transform.mat4();
 			push.normalMatrix = obj.transform.normalMatrix();
-
 			vkCmdPushConstants(
 				frameInfo.commandBuffer,
 				pipelineLayout,
@@ -119,6 +94,22 @@ namespace lve {
 				0,
 				sizeof(SimplePushConstantData),
 				&push
+			);
+
+			auto imageInfo = lveTextureStorage.descriptorInfo(defaultSamplerName, obj.model->getTextureName());
+			LveDescriptorWriter(textureSetLayout, texturePool)
+				.writeImage(0, &imageInfo)
+				.overwrite(descriptorSets[frameInfo.frameIndex]);
+		
+			vkCmdBindDescriptorSets(
+				frameInfo.commandBuffer,
+				VK_PIPELINE_BIND_POINT_GRAPHICS,
+				pipelineLayout,
+				0,
+				static_cast<uint32_t>(bindDescriptorSets.size()),
+				bindDescriptorSets.data(),
+				0,
+				nullptr
 			);
 			
 			obj.model->bind(frameInfo.commandBuffer);
