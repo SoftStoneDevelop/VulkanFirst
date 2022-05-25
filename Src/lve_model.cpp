@@ -149,6 +149,17 @@ namespace lve {
 		return attributeDescriptions;
 	}
 
+	void LveModel::setTextureName(std::string&& textureName)
+	{
+		(*this).textureName = std::move(textureName);
+		textureChange = true;
+	}
+
+	std::string& LveModel::getTextureName()
+	{
+		return textureName;
+	}
+
 	void LveModel::Builder::loadModel(const std::string& filepath) {
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;

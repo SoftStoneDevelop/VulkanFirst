@@ -2,6 +2,8 @@
 
 #include "lve_buffer.hpp"
 #include "lve_device.hpp"
+#include "Definitions/DefaultSamplersNames.hpp"
+#include "lve_swap_chain.hpp"
 
 //libs
 #define GLM_FORCE_RADIANSE
@@ -57,6 +59,11 @@ namespace lve {
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
 
+		void setTextureName(std::string&& textureName);
+		std::string& getTextureName();
+
+		bool textureChange = true;
+
 	private:
 		void createVertexBuffers(const std::vector<Vertex>& vertices);
 		void createIndexBuffers(const std::vector<uint32_t>& indices);
@@ -69,5 +76,9 @@ namespace lve {
 		bool hasIndexBuffer = false;
 		std::unique_ptr<LveBuffer> indexBuffer;
 		uint32_t indexCount;
+
+		std::string textureName;
+
+		std::string samplerName = defaultSamplerName;
 	};
 }

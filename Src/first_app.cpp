@@ -26,6 +26,10 @@ namespace lve {
 		globalPool = LveDescriptorPool::Builder(lveDevice)
 			.setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.build();
+
+		texturePool = LveDescriptorPool::Builder(lveDevice)
+			.setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
 		loadTextures();
@@ -51,7 +55,6 @@ namespace lve {
 
 		auto globalSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build()
 			;
 
@@ -59,17 +62,28 @@ namespace lve {
 		for (int i = 0; i < globalDescriptorSets.size(); i++)
 		{
 			auto bufferInfo = uboBuffers[i]->descriptorInfo();
-			auto imageInfo = lveTextureStorage.descriptorInfo(defaultSamplerName, "statue");
 			LveDescriptorWriter(*globalSetLayout, *globalPool)
 				.writeBuffer(0, &bufferInfo)
-				.writeImage(1, &imageInfo)
 				.build(globalDescriptorSets[i]);
 		}
+
+		auto textureSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.build()
+			;
+
+		std::vector<VkDescriptorSet> descriptorSets{ LveSwapChain::MAX_FRAMES_IN_FLIGHT };
+		for (int i = 0; i < descriptorSets.size(); i++)
+			texturePool->allocateDescriptor(textureSetLayout->getDescriptorSetLayout(), descriptorSets[i]);
 		
 		SimpleRenderSystem simpleRenderSystem{
 			lveDevice,
+			lveTextureStorage,
 			lveRenderer.getSwapChainRenderPass(),
-			globalSetLayout->getDescriptorSetLayout()
+			*globalSetLayout,
+			*textureSetLayout,
+			*texturePool,
+			descriptorSets
 		};
 
 		PointLightSystem pointLightSystem{
@@ -141,6 +155,7 @@ namespace lve {
 		flatVase.model = lveModel;
 		flatVase.transform.translation = { -.5f, .5f, 0.f };
 		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
+		flatVase.model->setTextureName("statue");
         gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
 		lveModel = LveModel::createModelFromFile(lveDevice, "Models/smooth_vase.obj");
@@ -148,6 +163,7 @@ namespace lve {
 		smoothVase.model = lveModel;
 		smoothVase.transform.translation = { .5f, .5f, 0.f };
 		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
+		smoothVase.model->setTextureName("statue");
 		gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
 
 		lveModel = LveModel::createModelFromFile(lveDevice, "Models/quad.obj");
@@ -155,6 +171,7 @@ namespace lve {
 		floor.model = lveModel;
 		floor.transform.translation = { 0.f, .5f, 0.f };
 		floor.transform.scale = { 3.f, 1.f, 3.f };
+		floor.model->setTextureName("statue");
 		gameObjects.emplace(floor.getId(), std::move(floor));
 
 		auto pointLight = LveGameObject::makePointLight(0.02f);

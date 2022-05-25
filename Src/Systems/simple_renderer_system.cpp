@@ -1,3 +1,5 @@
+#pragma once
+
 #include "simple_render_system.hpp"
 
 //libs
@@ -16,8 +18,18 @@ namespace lve {
 		glm::mat4 normalMatrix{ 1.f };
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(LveDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : lveDevice{ device } {
-		createPipelineLayout(globalSetLayout);
+	SimpleRenderSystem::SimpleRenderSystem(
+		LveDevice& device,
+		LveTextureStorage& lveTextureStorage,
+		VkRenderPass renderPass,
+		LveDescriptorSetLayout& globalSetLayout,
+		LveDescriptorSetLayout& textureSetLayout,
+		LveDescriptorPool& pool,
+		std::vector<VkDescriptorSet>& descriptorSets
+	) : lveDevice{ device }, lveTextureStorage{ lveTextureStorage },
+		textureSetLayout{ textureSetLayout }, texturePool{ pool },
+		descriptorSets{ descriptorSets } {
+		createPipelineLayout(globalSetLayout.getDescriptorSetLayout());
 		createPipeline(renderPass);
 	}
 
@@ -32,7 +44,7 @@ namespace lve {
 		pushConstantRange.offset = 0;
 		pushConstantRange.size = sizeof(SimplePushConstantData);
 
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout, textureSetLayout.getDescriptorSetLayout()};
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -66,21 +78,36 @@ namespace lve {
 	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
 		lvePipeline->bind(frameInfo.commandBuffer);
 
+		std::vector<VkDescriptorSet> bindDescriptorSets{ frameInfo.globalDescriptorSet, descriptorSets[frameInfo.frameIndex] };
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,
 			pipelineLayout,
 			0,
-			1,
-			&frameInfo.globalDescriptorSet,
+			static_cast<uint32_t>(bindDescriptorSets.size()),
+			bindDescriptorSets.data(),
 			0,
 			nullptr
 		);
 
-		for (auto& kv : frameInfo.gameObjects) {
+		for (auto& kv : frameInfo.gameObjects) 
+		{
 			auto& obj = kv.second;
 			if (obj.model == nullptr) continue;
 
+			if (obj.model->textureChange)
+			{
+				for (int i = 0; i < descriptorSets.size(); i++)
+				{
+					auto imageInfo = lveTextureStorage.descriptorInfo(defaultSamplerName, obj.model->getTextureName());
+					LveDescriptorWriter(textureSetLayout, texturePool)
+						.writeImage(0, &imageInfo)
+						.overwrite(descriptorSets[i]);
+				}
+
+				obj.model->textureChange = false;
+			}
+			
 			SimplePushConstantData push{};
 			push.modelMatrix = obj.transform.mat4();
 			push.normalMatrix = obj.transform.normalMatrix();
@@ -93,7 +120,7 @@ namespace lve {
 				sizeof(SimplePushConstantData),
 				&push
 			);
-
+			
 			obj.model->bind(frameInfo.commandBuffer);
 			obj.model->draw(frameInfo.commandBuffer);
 		}
