@@ -21,7 +21,7 @@ namespace lve {
         : lveDevice{ device } 
     {
         texturePool = LveDescriptorPool::Builder(lveDevice)
-            .setMaxSets(1)
+            .setMaxSets(3)
             .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
             .build();
 
