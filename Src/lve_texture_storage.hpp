@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lve_device.hpp"
+#include "lve_descriptors.hpp"
 
 #include <string>
 #include <unordered_map>
@@ -23,21 +24,28 @@ namespace lve {
 
 		void loadTexture(const std::string& texturePath, const std::string& textureName);
 		void unloadTexture(const std::string& textureName);
-		TextureData& getTextureData(const std::string& textureName);
 
 		VkSampler createTextureSampler(VkSamplerCreateInfo& samplerInfo, const std::string& samplerName);
 		void destroySampler(const std::string& samplerName);
-		VkSampler getSampler(const std::string& samplerName);
 
 		VkDescriptorImageInfo descriptorInfo(const std::string& samplerName, const std::string& textureName);
+
+		const LveDescriptorSetLayout& getTextureDescriptorSetLayout() const { return *textureSetLayout; }
+		const VkDescriptorSet getDescriptorSet(const std::string& textureName, const std::string& samplerName);
 
 	private:
 		void createTextureImage(LveTextureStorage::TextureData& imageData, const std::string& texturePath);
 		void destroyAndFreeTextureData(const TextureData& data);
 
+		TextureData& getTextureData(const std::string& textureName);
+		VkSampler getSampler(const std::string& samplerName);
+
 		std::unordered_map<std::string, TextureData> textureDatas;
 		std::unordered_map<std::string, VkSampler> textureSamplers;
 
 		LveDevice& lveDevice;
+		std::unique_ptr<LveDescriptorPool> texturePool;
+		std::unique_ptr<LveDescriptorSetLayout> textureSetLayout;
+		std::unordered_map<std::string, VkDescriptorSet> textureDescriptors;
 	};
 } // namespace lve

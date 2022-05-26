@@ -22,13 +22,9 @@ namespace lve {
 		LveDevice& device,
 		LveTextureStorage& lveTextureStorage,
 		VkRenderPass renderPass,
-		LveDescriptorSetLayout& globalSetLayout,
-		LveDescriptorSetLayout& textureSetLayout,
-		LveDescriptorPool& pool,
-		std::vector<VkDescriptorSet>& descriptorSets
-	) : lveDevice{ device }, lveTextureStorage{ lveTextureStorage },
-		textureSetLayout{ textureSetLayout }, texturePool{ pool },
-		descriptorSets{ descriptorSets } {
+		LveDescriptorSetLayout& globalSetLayout
+	) : lveDevice{ device }, lveTextureStorage{ lveTextureStorage }
+	{
 		createPipelineLayout(globalSetLayout.getDescriptorSetLayout());
 		createPipeline(renderPass);
 	}
@@ -44,7 +40,10 @@ namespace lve {
 		pushConstantRange.offset = 0;
 		pushConstantRange.size = sizeof(SimplePushConstantData);
 
-		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout, textureSetLayout.getDescriptorSetLayout()};
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ 
+			globalSetLayout,
+			lveTextureStorage.getTextureDescriptorSetLayout().getDescriptorSetLayout()
+		};
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -78,7 +77,17 @@ namespace lve {
 	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
 		lvePipeline->bind(frameInfo.commandBuffer);
 
-		std::vector<VkDescriptorSet> bindDescriptorSets{ frameInfo.globalDescriptorSet, descriptorSets[frameInfo.frameIndex] };
+		vkCmdBindDescriptorSets(
+			frameInfo.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout,
+			0,
+			1,
+			&frameInfo.globalDescriptorSet,
+			0,
+			nullptr
+		);
+
 		for (auto& kv : frameInfo.gameObjects) 
 		{
 			auto& obj = kv.second;
@@ -96,18 +105,14 @@ namespace lve {
 				&push
 			);
 
-			auto imageInfo = lveTextureStorage.descriptorInfo(defaultSamplerName, obj.model->getTextureName());
-			LveDescriptorWriter(textureSetLayout, texturePool)
-				.writeImage(0, &imageInfo)
-				.overwrite(descriptorSets[frameInfo.frameIndex]);
-		
+			auto descriptorTextureSet = lveTextureStorage.getDescriptorSet(obj.model->getTextureName(), defaultSamplerName);
 			vkCmdBindDescriptorSets(
 				frameInfo.commandBuffer,
 				VK_PIPELINE_BIND_POINT_GRAPHICS,
 				pipelineLayout,
-				0,
-				static_cast<uint32_t>(bindDescriptorSets.size()),
-				bindDescriptorSets.data(),
+				1,
+				1,
+				&descriptorTextureSet,
 				0,
 				nullptr
 			);

@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include "lve_buffer.hpp"
 #include "Definitions/DefaultSamplersNames.hpp"
+#include "lve_swap_chain.hpp"
 
 #ifndef ENGINE_DIR
 #define ENGINE_DIR "../../../" 
@@ -19,6 +20,15 @@ namespace lve {
         LveDevice& device)
         : lveDevice{ device } 
     {
+        texturePool = LveDescriptorPool::Builder(lveDevice)
+            .setMaxSets(1)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
+            .build();
+
+        textureSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build()
+            ;
     }
 
     LveTextureStorage::~LveTextureStorage()
@@ -207,6 +217,22 @@ namespace lve {
         vkDestroyImageView(lveDevice.device(), data.imageView, nullptr);
         vkDestroyImage(lveDevice.device(), data.image, nullptr);
         vkFreeMemory(lveDevice.device(), data.imageMemory, nullptr);
+    }
+
+    const VkDescriptorSet LveTextureStorage::getDescriptorSet(const std::string& textureName, const std::string& samplerName)
+    {
+        if (textureDescriptors.count(textureName + samplerName) != 0)
+            return textureDescriptors[textureName + samplerName];
+
+        auto descriptorImage = descriptorInfo(samplerName, textureName);
+
+        VkDescriptorSet descriptorSet{};
+        LveDescriptorWriter(*textureSetLayout, *texturePool)
+            .writeImage(0, &descriptorImage)
+            .build(descriptorSet);
+        
+        textureDescriptors[textureName + samplerName] = descriptorSet;
+        return descriptorSet;
     }
 
 }//namespace lve

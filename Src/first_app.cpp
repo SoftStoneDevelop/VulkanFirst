@@ -28,10 +28,6 @@ namespace lve {
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
 
-		texturePool = LveDescriptorPool::Builder(lveDevice)
-			.setMaxSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.build();
 		loadTextures();
 		loadGameObjects();
 	}
@@ -66,24 +62,12 @@ namespace lve {
 				.writeBuffer(0, &bufferInfo)
 				.build(globalDescriptorSets[i]);
 		}
-
-		auto textureSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-			.build()
-			;
-
-		std::vector<VkDescriptorSet> descriptorSets{ LveSwapChain::MAX_FRAMES_IN_FLIGHT };
-		for (int i = 0; i < descriptorSets.size(); i++)
-			texturePool->allocateDescriptor(textureSetLayout->getDescriptorSetLayout(), descriptorSets[i]);
 		
 		SimpleRenderSystem simpleRenderSystem{
 			lveDevice,
 			lveTextureStorage,
 			lveRenderer.getSwapChainRenderPass(),
-			*globalSetLayout,
-			*textureSetLayout,
-			*texturePool,
-			descriptorSets
+			*globalSetLayout
 		};
 
 		PointLightSystem pointLightSystem{

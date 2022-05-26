@@ -21,10 +21,7 @@ namespace lve {
 			LveDevice& device,
 			LveTextureStorage& lveTextureStorage,
 			VkRenderPass renderPass,
-			LveDescriptorSetLayout& globalSetLayout,
-			LveDescriptorSetLayout& textureSetLayout,
-			LveDescriptorPool& pool,
-			std::vector<VkDescriptorSet>& descriptorSets
+			LveDescriptorSetLayout& globalSetLayout
 		);
 		~SimpleRenderSystem();
 
@@ -38,11 +35,8 @@ namespace lve {
 
 		LveDevice& lveDevice;
 		LveTextureStorage& lveTextureStorage;
-		LveDescriptorPool& texturePool;
 
 		std::unique_ptr<LvePipeline> lvePipeline;
 		VkPipelineLayout pipelineLayout;
-		LveDescriptorSetLayout& textureSetLayout;
-		std::vector<VkDescriptorSet>& descriptorSets;
 	};
 }
