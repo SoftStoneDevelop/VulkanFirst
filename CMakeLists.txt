@@ -22,7 +22,10 @@ if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
 endif()
 
 # Add source to this project's executable.
-file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/Src/*.cpp)
+file(GLOB_RECURSE SOURCES
+${PROJECT_SOURCE_DIR}/Src/*.cpp
+${PROJECT_SOURCE_DIR}/External/imgui/*.cpp
+)
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # TODO: Add tests and install targets if needed.
@@ -31,6 +34,12 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 if (NOT TINYOBJ_PATH)
   message(STATUS "TINYOBJ_PATH not specified in .env.cmake, using external/tinyobjloader")
   set(TINYOBJ_PATH External/tinyobjloader)
+endif() 
+
+# If IMGUI_PATH not specified in .env.cmake, try fetching from git repo
+if (NOT IMGUI_PATH)
+  message(STATUS "IMGUI_PATH not specified in .env.cmake, using external/imgui")
+  set(IMGUI_PATH External/imgui)
 endif()
 
 # If STB_IMAGE_PATH not specified in .env.cmake, try fetching from git repo
@@ -95,6 +104,7 @@ if (WIN32)
     ${GLFW_INCLUDE_DIRS}
     ${GLM_PATH}
     ${TINYOBJ_PATH}
+    ${IMGUI_PATH}
     ${STB_IMAGE_PATH}
     )
 
@@ -110,6 +120,7 @@ elseif (UNIX)
     target_include_directories(${PROJECT_NAME} PUBLIC
       ${PROJECT_SOURCE_DIR}/src
       ${TINYOBJ_PATH}
+      ${IMGUI_PATH}
       ${STB_IMAGE_PATH}
     )
     target_link_libraries(${PROJECT_NAME} glfw ${Vulkan_LIBRARIES})
