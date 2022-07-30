@@ -93,7 +93,7 @@ namespace lve {
         throw std::runtime_error("Not find sampler with name:" + samplerName);
     }
 
-    LveTextureStorage::TextureData& LveTextureStorage::getTextureData(const std::string& textureName)
+    const LveTextureStorage::TextureData& LveTextureStorage::getTextureData(const std::string& textureName)
     {
         if (textureDatas.count(textureName) == 0)
         {
@@ -132,9 +132,9 @@ namespace lve {
     }
 
     void LveTextureStorage::createTextureImage(LveTextureStorage::TextureData& imageData, const std::string& texturePath) {
-        int texWidth, texHeight, texChannels;
-        stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-        VkDeviceSize imageSize = texWidth * texHeight * 4;
+        int texChannels;
+        stbi_uc* pixels = stbi_load(texturePath.c_str(), &imageData.texWidth, &imageData.texHeight, &texChannels, STBI_rgb_alpha);
+        VkDeviceSize imageSize = imageData.texWidth * imageData.texHeight * 4;
 
         if (!pixels) {
             throw std::runtime_error("failed to load image!");
@@ -155,8 +155,8 @@ namespace lve {
         VkImageCreateInfo imageInfo{};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width = texWidth;
-        imageInfo.extent.height = texHeight;
+        imageInfo.extent.width = imageData.texWidth;
+        imageInfo.extent.height = imageData.texHeight;
         imageInfo.extent.depth = 1;
         imageInfo.mipLevels = 1;
         imageInfo.arrayLayers = 1;
@@ -182,8 +182,8 @@ namespace lve {
         lveDevice.copyBufferToImage(
             stagingBuffer.getBuffer(),
             imageData.image,
-            static_cast<uint32_t>(texWidth),
-            static_cast<uint32_t>(texHeight),
+            static_cast<uint32_t>(imageData.texWidth),
+            static_cast<uint32_t>(imageData.texHeight),
             1
         );
 

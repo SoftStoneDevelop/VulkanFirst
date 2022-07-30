@@ -14,6 +14,8 @@ namespace lve {
 			VkImage image;
 			VkImageView imageView;
 			VkDeviceMemory imageMemory;
+			int texWidth; 
+			int texHeight;
 		};
 
 		LveTextureStorage(LveDevice& device);
@@ -33,11 +35,12 @@ namespace lve {
 		const LveDescriptorSetLayout& getTextureDescriptorSetLayout() const { return *textureSetLayout; }
 		const VkDescriptorSet getDescriptorSet(const std::string& textureName, const std::string& samplerName);
 
+		const TextureData& getTextureData (const std::string& textureName);
+
 	private:
 		void createTextureImage(LveTextureStorage::TextureData& imageData, const std::string& texturePath);
 		void destroyAndFreeTextureData(const TextureData& data);
 
-		TextureData& getTextureData(const std::string& textureName);
 		VkSampler getSampler(const std::string& samplerName);
 
 		std::unordered_map<std::string, TextureData> textureDatas;

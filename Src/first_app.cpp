@@ -107,6 +107,7 @@ namespace lve {
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
+		bool c = true;
 		while (!lveWindow.shouldClose()) {
 			glfwPollEvents();
 
@@ -148,8 +149,18 @@ namespace lve {
 				//order here matters
 				simpleRenderSystem.renderGameObjects(frameInfo);
 				pointLightSystem.render(frameInfo);
+
 				ImGuiNewFrame();
-				ImGui::Button("Hello button");
+				auto tData = lveTextureStorage.getTextureData("statue");
+				ImGui::SetNextWindowSizeConstraints(
+					{ },
+					{ (float)tData.texWidth, (float)tData.texHeight }
+				);
+				ImGui::Begin("Hello button");
+				auto info = lveTextureStorage.getDescriptorSet("statue", defaultSamplerName);
+				ImGui::Image(info, { (float)tData.texWidth, (float)tData.texHeight });
+				ImGui::End();
+				
 				ImGuiRender(commandBuffer);
 
 				lveRenderer.endSwapChainRenderPass(commandBuffer);
