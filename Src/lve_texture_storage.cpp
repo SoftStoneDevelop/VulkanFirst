@@ -18,7 +18,7 @@ namespace lve {
 
     LveTextureStorage::LveTextureStorage(
         LveDevice& device)
-        : lveDevice{ device } 
+        : lveDevice{ device }
     {
         texturePool = LveDescriptorPool::Builder(lveDevice)
             .setMaxSets(3)
@@ -131,9 +131,8 @@ namespace lve {
         textureDatas.erase(samplerName);
     }
 
-    void LveTextureStorage::createTextureImage(LveTextureStorage::TextureData& imageData, const std::string& texturePath) {
-        int texChannels;
-        stbi_uc* pixels = stbi_load(texturePath.c_str(), &imageData.texWidth, &imageData.texHeight, &texChannels, STBI_rgb_alpha);
+    void LveTextureStorage::createTextureImage(LveTextureStorage::TextureData& imageData, char* pixels)
+    {
         VkDeviceSize imageSize = imageData.texWidth * imageData.texHeight * 4;
 
         if (!pixels) {
@@ -196,7 +195,22 @@ namespace lve {
 
     void LveTextureStorage::loadTexture(const std::string& texturePath, const std::string& textureName) {
         LveTextureStorage::TextureData imageData{};
-        createTextureImage(imageData, ENGINE_DIR + texturePath);
+        int texChannels;
+        stbi_uc* pixels = stbi_load((ENGINE_DIR + texturePath).c_str(), &imageData.texWidth, &imageData.texHeight, &texChannels, STBI_rgb_alpha);
+        createTextureImage(imageData, reinterpret_cast<char*>(pixels));
+        lveDevice.createImageView(imageData.imageView, imageData.image, VK_FORMAT_R8G8B8A8_SRGB);
+
+        assert(textureDatas.count(textureName) == 0 && "Texture already in use");
+        textureDatas[textureName] = std::move(imageData);
+    }
+
+    void LveTextureStorage::loadTexture(const char* image, const int& imageSize, const std::string& textureName)
+    {
+        LveTextureStorage::TextureData imageData{};
+        int texChannels;
+        auto s = reinterpret_cast<const stbi_uc*>(image);
+        stbi_uc* pixels = stbi_load_from_memory(s, 10, &imageData.texWidth, &imageData.texHeight, &texChannels, STBI_rgb_alpha);
+        createTextureImage(imageData, reinterpret_cast<char*>(pixels));
         lveDevice.createImageView(imageData.imageView, imageData.image, VK_FORMAT_R8G8B8A8_SRGB);
 
         assert(textureDatas.count(textureName) == 0 && "Texture already in use");
@@ -230,7 +244,7 @@ namespace lve {
         LveDescriptorWriter(*textureSetLayout, *texturePool)
             .writeImage(0, &descriptorImage)
             .build(descriptorSet);
-        
+
         textureDescriptors[textureName + samplerName] = descriptorSet;
         return descriptorSet;
     }

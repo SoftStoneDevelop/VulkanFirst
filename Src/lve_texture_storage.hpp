@@ -7,14 +7,14 @@
 #include <unordered_map>
 
 namespace lve {
-	
+
 	class LveTextureStorage {
 	public:
 		struct TextureData {
 			VkImage image;
 			VkImageView imageView;
 			VkDeviceMemory imageMemory;
-			int texWidth; 
+			int texWidth;
 			int texHeight;
 		};
 
@@ -25,6 +25,7 @@ namespace lve {
 		LveTextureStorage& operator=(const LveTextureStorage&) = delete;
 
 		void loadTexture(const std::string& texturePath, const std::string& textureName);
+		void loadTexture(const char* image, const int& imageSize, const std::string& textureName);
 		void unloadTexture(const std::string& textureName);
 
 		VkSampler createTextureSampler(VkSamplerCreateInfo& samplerInfo, const std::string& samplerName);
@@ -35,10 +36,10 @@ namespace lve {
 		const LveDescriptorSetLayout& getTextureDescriptorSetLayout() const { return *textureSetLayout; }
 		const VkDescriptorSet getDescriptorSet(const std::string& textureName, const std::string& samplerName);
 
-		const TextureData& getTextureData (const std::string& textureName);
+		const TextureData& getTextureData(const std::string& textureName);
 
 	private:
-		void createTextureImage(LveTextureStorage::TextureData& imageData, const std::string& texturePath);
+		void createTextureImage(LveTextureStorage::TextureData& imageData, char* pixels);
 		void destroyAndFreeTextureData(const TextureData& data);
 
 		VkSampler getSampler(const std::string& samplerName);
