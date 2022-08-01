@@ -193,28 +193,39 @@ namespace lve {
         );
     }
 
-    void LveTextureStorage::loadTexture(const std::string& texturePath, const std::string& textureName) {
+    bool LveTextureStorage::loadTexture(const std::string& texturePath, const std::string& textureName) {
         LveTextureStorage::TextureData imageData{};
         int texChannels;
         stbi_uc* pixels = stbi_load((ENGINE_DIR + texturePath).c_str(), &imageData.texWidth, &imageData.texHeight, &texChannels, STBI_rgb_alpha);
+        if (imageData.texWidth <= 0 || imageData.texHeight <= 0)
+        {
+            return false;
+        }
+
         createTextureImage(imageData, reinterpret_cast<char*>(pixels));
         lveDevice.createImageView(imageData.imageView, imageData.image, VK_FORMAT_R8G8B8A8_SRGB);
 
         assert(textureDatas.count(textureName) == 0 && "Texture already in use");
         textureDatas[textureName] = std::move(imageData);
+        return true;
     }
 
-    void LveTextureStorage::loadTexture(const char* image, const int& imageSize, const std::string& textureName)
+    bool LveTextureStorage::loadTexture(const char* image, const int& imageSize, const std::string& textureName)
     {
         LveTextureStorage::TextureData imageData{};
         int texChannels;
-        auto s = reinterpret_cast<const stbi_uc*>(image);
-        stbi_uc* pixels = stbi_load_from_memory(s, 10, &imageData.texWidth, &imageData.texHeight, &texChannels, STBI_rgb_alpha);
+        auto imagePtr = reinterpret_cast<const stbi_uc*>(image);
+        stbi_uc* pixels = stbi_load_from_memory(imagePtr, imageSize, &imageData.texWidth, &imageData.texHeight, &texChannels, STBI_rgb_alpha);
+        if (imageData.texWidth <= 0 || imageData.texHeight <= 0)
+        {
+            return false;
+        }
         createTextureImage(imageData, reinterpret_cast<char*>(pixels));
         lveDevice.createImageView(imageData.imageView, imageData.image, VK_FORMAT_R8G8B8A8_SRGB);
 
         assert(textureDatas.count(textureName) == 0 && "Texture already in use");
         textureDatas[textureName] = std::move(imageData);
+        return true;
     }
 
     void LveTextureStorage::unloadTexture(const std::string& textureName) {
@@ -247,6 +258,11 @@ namespace lve {
 
         textureDescriptors[textureName + samplerName] = descriptorSet;
         return descriptorSet;
+    }
+
+    bool LveTextureStorage::ContainTexture(const std::string& textureName)
+    {
+        return textureDatas.count(textureName) != 0;
     }
 
 }//namespace lve

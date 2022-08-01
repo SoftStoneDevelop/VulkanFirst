@@ -24,8 +24,8 @@ namespace lve {
 		LveTextureStorage(const LveTextureStorage&) = delete;
 		LveTextureStorage& operator=(const LveTextureStorage&) = delete;
 
-		void loadTexture(const std::string& texturePath, const std::string& textureName);
-		void loadTexture(const char* image, const int& imageSize, const std::string& textureName);
+		bool loadTexture(const std::string& texturePath, const std::string& textureName);
+		bool loadTexture(const char* image, const int& imageSize, const std::string& textureName);
 		void unloadTexture(const std::string& textureName);
 
 		VkSampler createTextureSampler(VkSamplerCreateInfo& samplerInfo, const std::string& samplerName);
@@ -37,6 +37,7 @@ namespace lve {
 		const VkDescriptorSet getDescriptorSet(const std::string& textureName, const std::string& samplerName);
 
 		const TextureData& getTextureData(const std::string& textureName);
+		bool ContainTexture(const std::string& textureName);
 
 	private:
 		void createTextureImage(LveTextureStorage::TextureData& imageData, char* pixels);
