@@ -10,6 +10,7 @@
 
 #include <stdexcept>
 #include <array>
+#include <Helpers/VulkanHelpers.hpp>
 
 namespace lve {
 
@@ -51,9 +52,11 @@ namespace lve {
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-		if (vkCreatePipelineLayout(lveDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+
+		auto vkResult = vkCreatePipelineLayout(lveDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout);
+		if (vkResult != VK_SUCCESS)
 		{
-			std::runtime_error("failed to create pipeline layout!");
+			std::runtime_error("failed to create pipeline layout!" + VulkanHelpers::AsString(vkResult));
 		}
 	}
 

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <set>
 #include <unordered_set>
+#include <Helpers/VulkanHelpers.hpp>
 
 namespace lve {
 
@@ -101,8 +102,10 @@ void LveDevice::createInstance() {
     createInfo.pNext = nullptr;
   }
 
-  if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create instance!");
+  auto vkResult = vkCreateInstance(&createInfo, nullptr, &instance);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create instance!" + VulkanHelpers::AsString(vkResult));
   }
 
   hasGflwRequiredInstanceExtensions();
@@ -171,8 +174,10 @@ void LveDevice::createLogicalDevice() {
     createInfo.enabledLayerCount = 0;
   }
 
-  if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device_) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create logical device!");
+  auto vkResult = vkCreateDevice(physicalDevice, &createInfo, nullptr, &device_);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create logical device!" + VulkanHelpers::AsString(vkResult));
   }
 
   vkGetDeviceQueue(device_, indices.graphicsFamily, 0, &graphicsQueue_);
@@ -188,8 +193,10 @@ void LveDevice::createCommandPool() {
   poolInfo.flags =
       VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-  if (vkCreateCommandPool(device_, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create command pool!");
+  auto vkResult = vkCreateCommandPool(device_, &poolInfo, nullptr, &commandPool);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create command pool!" + VulkanHelpers::AsString(vkResult));
   }
 }
 
@@ -230,8 +237,11 @@ void LveDevice::setupDebugMessenger() {
   if (!enableValidationLayers) return;
   VkDebugUtilsMessengerCreateInfoEXT createInfo;
   populateDebugMessengerCreateInfo(createInfo);
-  if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
-    throw std::runtime_error("failed to set up debug messenger!");
+  
+  auto vkResult = CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to set up debug messenger!" + VulkanHelpers::AsString(vkResult));
   }
 }
 
@@ -415,8 +425,10 @@ void LveDevice::createBuffer(
   bufferInfo.usage = usage;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateBuffer(device_, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create vertex buffer!");
+  auto vkResult = vkCreateBuffer(device_, &bufferInfo, nullptr, &buffer);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create vertex buffer!" + VulkanHelpers::AsString(vkResult));
   }
 
   VkMemoryRequirements memRequirements;
@@ -427,8 +439,10 @@ void LveDevice::createBuffer(
   allocInfo.allocationSize = memRequirements.size;
   allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-  if (vkAllocateMemory(device_, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
-    throw std::runtime_error("failed to allocate vertex buffer memory!");
+  vkResult = vkAllocateMemory(device_, &allocInfo, nullptr, &bufferMemory);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to allocate vertex buffer memory!" + VulkanHelpers::AsString(vkResult));
   }
 
   vkBindBufferMemory(device_, buffer, bufferMemory, 0);
@@ -510,8 +524,11 @@ void LveDevice::createImageWithInfo(
     VkMemoryPropertyFlags properties,
     VkImage &image,
     VkDeviceMemory &imageMemory) {
-  if (vkCreateImage(device_, &imageInfo, nullptr, &image) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create image!");
+  
+  auto vkResult = vkCreateImage(device_, &imageInfo, nullptr, &image);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create image!" + VulkanHelpers::AsString(vkResult));
   }
 
   VkMemoryRequirements memRequirements;
@@ -522,12 +539,16 @@ void LveDevice::createImageWithInfo(
   allocInfo.allocationSize = memRequirements.size;
   allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-  if (vkAllocateMemory(device_, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
-    throw std::runtime_error("failed to allocate image memory!");
+  vkResult = vkAllocateMemory(device_, &allocInfo, nullptr, &imageMemory);
+  if (vkResult != VK_SUCCESS) 
+  {
+    throw std::runtime_error("failed to allocate image memory!" + VulkanHelpers::AsString(vkResult));
   }
 
-  if (vkBindImageMemory(device_, image, imageMemory, 0) != VK_SUCCESS) {
-    throw std::runtime_error("failed to bind image memory!");
+  vkResult = vkBindImageMemory(device_, image, imageMemory, 0);
+  if (vkResult != VK_SUCCESS) 
+  {
+    throw std::runtime_error("failed to bind image memory!" + VulkanHelpers::AsString(vkResult));
   }
 }
 
@@ -544,8 +565,10 @@ void LveDevice::createImageView(VkImageView& imageView, VkImage& image, VkFormat
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(device_, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create image view!");
+    auto vkResult = vkCreateImageView(device_, &viewInfo, nullptr, &imageView);
+    if (vkResult != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create image view!" + VulkanHelpers::AsString(vkResult));
     }
 }
 

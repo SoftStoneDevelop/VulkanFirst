@@ -1,3 +1,4 @@
+#pragma once
 #include "point_light_system.hpp"
 
 //libs
@@ -9,6 +10,7 @@
 #include <stdexcept>
 #include <map>
 #include <array>
+#include <Helpers/VulkanHelpers.hpp>
 
 namespace lve {
 
@@ -21,17 +23,19 @@ namespace lve {
 
 	PointLightSystem::PointLightSystem(
 		LveDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) 
-		: lveDevice{ device } {
+		: lveDevice{ device } 
+	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
-	PointLightSystem::~PointLightSystem() {
+	PointLightSystem::~PointLightSystem() 
+	{
 		vkDestroyPipelineLayout(lveDevice.device(), pipelineLayout, nullptr);
 	}
 
-	void PointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
-
+	void PointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) 
+	{
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstantRange.offset = 0;
@@ -45,9 +49,11 @@ namespace lve {
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-		if (vkCreatePipelineLayout(lveDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+
+		auto vkResult = vkCreatePipelineLayout(lveDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout);
+		if (vkResult != VK_SUCCESS)
 		{
-			std::runtime_error("failed to create pipeline layout!");
+			std::runtime_error("failed to create pipeline layout!" + VulkanHelpers::AsString(vkResult));
 		}
 	}
 

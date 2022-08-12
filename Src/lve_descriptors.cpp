@@ -3,6 +3,7 @@
 // std
 #include <cassert>
 #include <stdexcept>
+#include <Helpers/VulkanHelpers.cpp>
 
 namespace lve {
 
@@ -31,9 +32,11 @@ namespace lve {
 
     LveDescriptorSetLayout::LveDescriptorSetLayout(
         LveDevice& lveDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
-        : lveDevice{ lveDevice }, bindings{ bindings } {
+        : lveDevice{ lveDevice }, bindings{ bindings } 
+    {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
-        for (auto kv : bindings) {
+        for (auto kv : bindings) 
+        {
             setLayoutBindings.push_back(kv.second);
         }
 
@@ -42,12 +45,16 @@ namespace lve {
         descriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
         descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
-        if (vkCreateDescriptorSetLayout(
+        auto vkResult = vkCreateDescriptorSetLayout(
             lveDevice.device(),
             &descriptorSetLayoutInfo,
             nullptr,
-            &descriptorSetLayout) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create descriptor set layout!");
+            &descriptorSetLayout)
+            ;
+
+        if (vkResult != VK_SUCCESS) 
+        {
+            throw std::runtime_error("failed to create descriptor set layout!" + VulkanHelpers::AsString(vkResult));
         }
     }
 
@@ -92,13 +99,15 @@ namespace lve {
         descriptorPoolInfo.maxSets = maxSets;
         descriptorPoolInfo.flags = poolFlags;
 
-        if (vkCreateDescriptorPool(lveDevice.device(), &descriptorPoolInfo, nullptr, &descriptorPool) !=
-            VK_SUCCESS) {
-            throw std::runtime_error("failed to create descriptor pool!");
+        auto vkResult = vkCreateDescriptorPool(lveDevice.device(), &descriptorPoolInfo, nullptr, &descriptorPool);
+        if (vkResult != VK_SUCCESS) 
+        {
+            throw std::runtime_error("failed to create descriptor pool!" + VulkanHelpers::AsString(vkResult));
         }
     }
 
-    LveDescriptorPool::~LveDescriptorPool() {
+    LveDescriptorPool::~LveDescriptorPool() 
+    {
         vkDestroyDescriptorPool(lveDevice.device(), descriptorPool, nullptr);
     }
 
@@ -112,7 +121,9 @@ namespace lve {
 
         // Might want to create a "DescriptorPoolManager" class that handles this case, and builds
         // a new pool whenever an old pool fills up. But this is beyond our current scope
-        if (vkAllocateDescriptorSets(lveDevice.device(), &allocInfo, &descriptor) != VK_SUCCESS) {
+        auto vkResult = vkAllocateDescriptorSets(lveDevice.device(), &allocInfo, &descriptor);
+        if (vkResult != VK_SUCCESS)
+        {
             return false;
         }
         return true;

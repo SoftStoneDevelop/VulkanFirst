@@ -2,19 +2,29 @@
 
 #include <stdexcept>
 #include <array>
+#include <Helpers/VulkanHelpers.hpp>
 
 namespace lve {
 
-	LveRenderer::LveRenderer(LveWindow& window, LveDevice& device) : lveWindow{ window }, lveDevice{ device }, currentImageIndex{ 0 }, currentFrameIndex{ 0 }, isFrameStarted{false} {
+	LveRenderer::LveRenderer(LveWindow& window, LveDevice& device)
+		: 
+		lveWindow{ window },
+		lveDevice{ device },
+		currentImageIndex{ 0 },
+		currentFrameIndex{ 0 },
+		isFrameStarted{false} 
+	{
 		recreateSwapChain();
 		createCommandBuffers();
 	}
 
-	LveRenderer::~LveRenderer() {
+	LveRenderer::~LveRenderer() 
+	{
 		freeCommandBuffers();
 	}
 
-	void LveRenderer::recreateSwapChain() {
+	void LveRenderer::recreateSwapChain() 
+	{
 		auto extent = lveWindow.getExtend();
 		while (extent.width == 0 || extent.height == 0)
 		{
@@ -41,7 +51,8 @@ namespace lve {
 		//we`ll come back to this in just a moment
 	}
 
-	void LveRenderer::createCommandBuffers() {
+	void LveRenderer::createCommandBuffers() 
+	{
 		commandBuffers.resize(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocateInfo{};
@@ -50,13 +61,15 @@ namespace lve {
 		allocateInfo.commandPool = lveDevice.getCommandPool();
 		allocateInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
 
-		if (vkAllocateCommandBuffers(lveDevice.device(), &allocateInfo, commandBuffers.data()) != VK_SUCCESS)
+		auto vkResult = vkAllocateCommandBuffers(lveDevice.device(), &allocateInfo, commandBuffers.data());
+		if (vkResult != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to allocate command buffers!");
+			throw std::runtime_error("failed to allocate command buffers!" + VulkanHelpers::AsString(vkResult));
 		}
 	};
 
-	void LveRenderer::freeCommandBuffers() {
+	void LveRenderer::freeCommandBuffers() 
+	{
 		vkFreeCommandBuffers(
 			lveDevice.device(),
 			lveDevice.getCommandPool(),
@@ -66,20 +79,21 @@ namespace lve {
 		commandBuffers.clear();
 	}
 
-	VkCommandBuffer LveRenderer::beginFrame() {
+	VkCommandBuffer LveRenderer::beginFrame() 
+	{
 		assert(!isFrameStarted && "Can`t call beginFrame while already in progress");
 
-		auto result = lveSwapChain->acquireNextImage(&currentImageIndex);
+		auto vkResult = lveSwapChain->acquireNextImage(&currentImageIndex);
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		if (vkResult == VK_ERROR_OUT_OF_DATE_KHR)
 		{
 			recreateSwapChain();
 			return nullptr;
 		}
 
-		if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		if (vkResult != VK_SUCCESS && vkResult != VK_SUBOPTIMAL_KHR)
 		{
-			throw std::runtime_error("failed to acquire swap chain image!");
+			throw std::runtime_error("failed to acquire swap chain image!" + VulkanHelpers::AsString(vkResult));
 		}
 
 		isFrameStarted = true;
@@ -88,40 +102,44 @@ namespace lve {
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
+		vkResult = vkBeginCommandBuffer(commandBuffer, &beginInfo);
+		if (vkResult != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to begin recording command buffer!");
+			throw std::runtime_error("failed to begin recording command buffer!" + VulkanHelpers::AsString(vkResult));
 		}
 
 		return commandBuffer;
 	}
 
-	void LveRenderer::endFrame() {
+	void LveRenderer::endFrame() 
+	{
 		assert(isFrameStarted && "Can`t call endFrame while frame is not in in progress");
 		auto commandBuffer = getCurrentCommandBuffer();
 
-		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+		auto vkResult = vkEndCommandBuffer(commandBuffer);
+		if (vkResult != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to record command buffer!");
+			throw std::runtime_error("failed to record command buffer!" + VulkanHelpers::AsString(vkResult));
 		}
 
-		auto result = lveSwapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
+		vkResult = lveSwapChain->submitCommandBuffers(&commandBuffer, &currentImageIndex);
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || lveWindow.wasWindowResized())
+		if (vkResult == VK_ERROR_OUT_OF_DATE_KHR || vkResult == VK_SUBOPTIMAL_KHR || lveWindow.wasWindowResized())
 		{
 			lveWindow.resetWindowResizedFlag();
 			recreateSwapChain();
 		}
-		else if (result != VK_SUCCESS)
+		else if (vkResult != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to present swap chain image!");
+			throw std::runtime_error("failed to present swap chain image!" + VulkanHelpers::AsString(vkResult));
 		}
 
 		isFrameStarted = false;
 		currentFrameIndex = (currentFrameIndex + 1) % LveSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
-	void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+	void LveRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) 
+	{
 		assert(isFrameStarted && "Can`t call beginSwapChainRenderPass while frame is not in in progress");
 		assert(commandBuffer == getCurrentCommandBuffer() && "Can`t begin render pass on command buffer from a different frame");
 
@@ -153,7 +171,8 @@ namespace lve {
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 	}
 
-	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+	void LveRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) 
+	{
 		assert(isFrameStarted && "Can`t call endSwapChainRenderPass while frame is not in in progress");
 		assert(commandBuffer == getCurrentCommandBuffer() && "Can`t end render pass on command buffer from a different frame");
 

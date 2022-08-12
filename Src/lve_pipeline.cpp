@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
+#include <Helpers/VulkanHelpers.hpp>
 
 namespace lve {
 
@@ -12,16 +13,21 @@ namespace lve {
 		LveDevice& device,
 		const std::string& vertFilepatch,
 		const std::string& fragFilepatch,
-		const PipelineConfigInfo& configInfo) : lveDevice{device} {
+		const PipelineConfigInfo& configInfo
+	)
+		: lveDevice{device} 
+	{
 		
 		createGraphicsPipeline(vertFilepatch, fragFilepatch, configInfo);
 	}
 
-	LvePipeline::~LvePipeline() {
+	LvePipeline::~LvePipeline() 
+	{
 		vkDestroyPipeline(lveDevice.device(), graphicsPipeline, nullptr);
 	}
 	
-	std::vector<char> LvePipeline::readFile(const std::string& filepath) {
+	std::vector<char> LvePipeline::readFile(const std::string& filepath) 
+	{
 		std::ifstream file{ filepath, std::ios::ate | std::ios::binary };
 
 		if (!file.is_open()) {
@@ -43,8 +49,8 @@ namespace lve {
 		const std::string& vertFilepath,
 		const std::string& fragFilepath,
 		const PipelineConfigInfo& configInfo
-	) {
-
+	) 
+	{
 		assert(
 			configInfo.pipelineLayout != VK_NULL_HANDLE &&
 			"Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
@@ -105,16 +111,18 @@ namespace lve {
 		pipelineInfo.basePipelineIndex = -1;
 		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-		if (vkCreateGraphicsPipelines(
+		auto vkResult = vkCreateGraphicsPipelines(
 			lveDevice.device(),
 			VK_NULL_HANDLE,
 			1,
 			&pipelineInfo,
 			nullptr,
 			&graphicsPipeline
-		) != VK_SUCCESS)
+		);
+
+		if (vkResult != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create graphics pipelien");
+			throw std::runtime_error("failed to create graphics pipelien" + VulkanHelpers::AsString(vkResult));
 		}
 
 		vkDestroyShaderModule(lveDevice.device(), vertShaderModule, nullptr);
@@ -129,15 +137,17 @@ namespace lve {
 		createInfo.codeSize = code.size();
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-		if (vkCreateShaderModule(lveDevice.device(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+		auto vkResult = vkCreateShaderModule(lveDevice.device(), &createInfo, nullptr, &shaderModule);
+		if (vkResult != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create shader module!");
+			throw std::runtime_error("failed to create shader module!" + VulkanHelpers::AsString(vkResult));
 		}
 
 		return shaderModule;
 	}
 
-	void LvePipeline::bind(VkCommandBuffer commandBuffer) {
+	void LvePipeline::bind(VkCommandBuffer commandBuffer) 
+	{
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 	}
 

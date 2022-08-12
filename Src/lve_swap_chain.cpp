@@ -8,6 +8,7 @@
 #include <limits>
 #include <set>
 #include <stdexcept>
+#include <Helpers/VulkanHelpers.hpp>
 
 namespace lve {
 
@@ -107,9 +108,10 @@ VkResult LveSwapChain::submitCommandBuffers(
   submitInfo.pSignalSemaphores = signalSemaphores;
 
   vkResetFences(device.device(), 1, &inFlightFences[currentFrame]);
-  if (vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) !=
-      VK_SUCCESS) {
-    throw std::runtime_error("failed to submit draw command buffer!");
+  auto vkResult = vkQueueSubmit(device.graphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]);
+  if (vkResult != VK_SUCCESS) 
+  {
+    throw std::runtime_error("failed to submit draw command buffer!" + VulkanHelpers::AsString(vkResult));
   }
 
   VkPresentInfoKHR presentInfo = {};
@@ -176,8 +178,10 @@ void LveSwapChain::createSwapChain() {
 
   createInfo.oldSwapchain = oldSwapChain == nullptr ? VK_NULL_HANDLE : oldSwapChain->swapChain;
 
-  if (vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create swap chain!");
+  auto vkResult = vkCreateSwapchainKHR(device.device(), &createInfo, nullptr, &swapChain);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create swap chain!" + VulkanHelpers::AsString(vkResult));
   }
 
   // we only specified a minimum number of images in the swap chain, so the implementation is
@@ -255,8 +259,10 @@ void LveSwapChain::createRenderPass() {
   renderPassInfo.dependencyCount = 1;
   renderPassInfo.pDependencies = &dependency;
 
-  if (vkCreateRenderPass(device.device(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create render pass!");
+  auto vkResult = vkCreateRenderPass(device.device(), &renderPassInfo, nullptr, &renderPass);
+  if (vkResult != VK_SUCCESS)
+  {
+    throw std::runtime_error("failed to create render pass!" + VulkanHelpers::AsString(vkResult));
   }
 }
 
@@ -275,12 +281,14 @@ void LveSwapChain::createFramebuffers() {
     framebufferInfo.height = swapChainExtent.height;
     framebufferInfo.layers = 1;
 
-    if (vkCreateFramebuffer(
-            device.device(),
-            &framebufferInfo,
-            nullptr,
-            &swapChainFramebuffers[i]) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create framebuffer!");
+    auto vkResult = vkCreateFramebuffer(
+        device.device(),
+        &framebufferInfo,
+        nullptr,
+        &swapChainFramebuffers[i]);
+    if (vkResult != VK_SUCCESS)
+    {
+      throw std::runtime_error("failed to create framebuffer!" + VulkanHelpers::AsString(vkResult));
     }
   }
 }
@@ -328,8 +336,10 @@ void LveSwapChain::createDepthResources() {
     viewInfo.subresourceRange.baseArrayLayer = 0;
     viewInfo.subresourceRange.layerCount = 1;
 
-    if (vkCreateImageView(device.device(), &viewInfo, nullptr, &depthImageViews[i]) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create texture image view!");
+    auto vkResult = vkCreateImageView(device.device(), &viewInfo, nullptr, &depthImageViews[i]);
+    if (vkResult != VK_SUCCESS)
+    {
+      throw std::runtime_error("failed to create texture image view!" + VulkanHelpers::AsString(vkResult));
     }
   }
 }
@@ -347,14 +357,25 @@ void LveSwapChain::createSyncObjects() {
   fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
   fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-    if (vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) !=
-            VK_SUCCESS ||
-        vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) !=
-            VK_SUCCESS ||
-        vkCreateFence(device.device(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create synchronization objects for a frame!");
-    }
+  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
+  {
+      auto vkResult = vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]);
+      if (vkResult != VK_SUCCESS)
+      {
+          throw std::runtime_error("failed to create imageAvailableSemaphore for a frame!" + VulkanHelpers::AsString(vkResult));
+      }
+
+      vkResult = vkCreateSemaphore(device.device(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]);
+      if (vkResult != VK_SUCCESS)
+      {
+          throw std::runtime_error("failed to create renderFinishedSemaphore for a frame!" + VulkanHelpers::AsString(vkResult));
+      }
+
+      vkResult = vkCreateFence(device.device(), &fenceInfo, nullptr, &inFlightFences[i]);
+      if (vkResult != VK_SUCCESS) 
+      {
+          throw std::runtime_error("failed to create inFlightFence for a frame!" + VulkanHelpers::AsString(vkResult));
+      }
   }
 }
 
