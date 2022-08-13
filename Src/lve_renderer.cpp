@@ -81,6 +81,7 @@ namespace lve {
 
 	VkCommandBuffer LveRenderer::beginFrame() 
 	{
+		globalFrameCounter++;
 		assert(!isFrameStarted && "Can`t call beginFrame while already in progress");
 
 		auto vkResult = lveSwapChain->acquireNextImage(&currentImageIndex);

@@ -34,6 +34,12 @@ namespace lve {
 			return currentFrameIndex;
 		}
 
+		/// <returns>Last frame count or current builded frame, if frame in started</returns>
+		int getCurrentFrameCount() const noexcept
+		{
+			return globalFrameCounter.load();
+		}
+
 		VkCommandBuffer beginFrame();
 		void endFrame();
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
@@ -52,6 +58,7 @@ namespace lve {
 
 		uint32_t currentImageIndex;
 		int currentFrameIndex;
+		std::atomic<int> globalFrameCounter;
 
 		bool isFrameStarted;
 	};

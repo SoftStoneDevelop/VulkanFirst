@@ -46,7 +46,7 @@ namespace lve {
 			.addPoolSize(VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, LveSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
 
-		InitializeImGui(lveWindow, lveDevice, lveRenderer.getSwapChainRenderPass(), imGuiPool->getDescriptorPool(), LveSwapChain::MAX_FRAMES_IN_FLIGHT);
+		InitializeImGui(lveWindow, lveDevice, lveRenderer->getSwapChainRenderPass(), imGuiPool->getDescriptorPool(), LveSwapChain::MAX_FRAMES_IN_FLIGHT);
 		loadTextures();
 		loadGameObjects();
 	}
@@ -90,13 +90,13 @@ namespace lve {
 		SimpleRenderSystem simpleRenderSystem{
 			lveDevice,
 			lveTextureStorage,
-			lveRenderer.getSwapChainRenderPass(),
+			lveRenderer->getSwapChainRenderPass(),
 			*globalSetLayout
 		};
 
 		PointLightSystem pointLightSystem{
 			lveDevice,
-			lveRenderer.getSwapChainRenderPass(),
+			lveRenderer->getSwapChainRenderPass(),
 			globalSetLayout->getDescriptorSetLayout()
 		};
         LveCamera camera{};
@@ -118,13 +118,13 @@ namespace lve {
             cameraController.moveInPlaneXZ(lveWindow.getGLFWwindow(), frameTime, viewerObject);
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
             
-            float aspect = lveRenderer.getAspectRation();
+            float aspect = lveRenderer->getAspectRation();
             //camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
             camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);
 
-			if (auto commandBuffer = lveRenderer.beginFrame())
+			if (auto commandBuffer = lveRenderer->beginFrame())
 			{
-				int frameIndex = lveRenderer.getFrameIndex();
+				int frameIndex = lveRenderer->getFrameIndex();
 				FrameInfo frameInfo{
 					frameIndex,
 					frameTime,
@@ -144,7 +144,7 @@ namespace lve {
 				uboBuffers[frameIndex]->flush();
 
 				//render
-				lveRenderer.beginSwapChainRenderPass(commandBuffer);
+				lveRenderer->beginSwapChainRenderPass(commandBuffer);
 
 				//order here matters
 				simpleRenderSystem.renderGameObjects(frameInfo);
@@ -163,8 +163,8 @@ namespace lve {
 				
 				ImGuiRender(commandBuffer);
 
-				lveRenderer.endSwapChainRenderPass(commandBuffer);
-				lveRenderer.endFrame();
+				lveRenderer->endSwapChainRenderPass(commandBuffer);
+				lveRenderer->endFrame();
 			}
 		}
 
@@ -225,8 +225,22 @@ namespace lve {
 
 	void FirstApp::loadTextures()
 	{
-		lveTextureStorage.loadTexture("Textures/statue.jpg", "statue");
-		lveTextureStorage.loadTexture("Textures/statue2.jpg", "statue2");
-		lveTextureStorage.loadTexture("Textures/statue3.jpg", "statue3");
+		VkSamplerCreateInfo sampler{};
+		sampler.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		sampler.magFilter = VK_FILTER_LINEAR;
+		sampler.minFilter = VK_FILTER_LINEAR;
+		sampler.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		sampler.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		sampler.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		sampler.anisotropyEnable = VK_TRUE;
+		sampler.maxAnisotropy = lveDevice.properties.limits.maxSamplerAnisotropy;
+		sampler.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		sampler.unnormalizedCoordinates = VK_FALSE;
+		sampler.compareEnable = VK_FALSE;
+		sampler.compareOp = VK_COMPARE_OP_ALWAYS;
+
+		lveTextureStorage.loadTexture("Textures/statue.jpg", "statue", sampler);
+		lveTextureStorage.loadTexture("Textures/statue2.jpg", "statue2", sampler);
+		lveTextureStorage.loadTexture("Textures/statue3.jpg", "statue3", sampler);
 	}
 }

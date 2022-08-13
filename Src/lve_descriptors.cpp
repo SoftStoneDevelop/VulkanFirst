@@ -3,7 +3,7 @@
 // std
 #include <cassert>
 #include <stdexcept>
-#include <Helpers/VulkanHelpers.cpp>
+#include <Helpers/VulkanHelpers.hpp>
 
 namespace lve {
 

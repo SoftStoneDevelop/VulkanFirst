@@ -31,8 +31,8 @@ namespace lve {
 		
 		LveWindow lveWindow{ WIDTH, HEIGHT, "Vulkan V" };
 		LveDevice lveDevice{ lveWindow };
-		LveTextureStorage lveTextureStorage{ lveDevice };
-		LveRenderer lveRenderer{ lveWindow, lveDevice };
+		std::shared_ptr<LveRenderer> lveRenderer = std::make_shared<LveRenderer>(lveWindow, lveDevice);
+		LveTextureStorage lveTextureStorage{ lveDevice, lveRenderer };
 
 		// note: order of declarations matters
 		std::unique_ptr<LveDescriptorPool> globalPool{};
